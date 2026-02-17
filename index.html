@@ -38,10 +38,7 @@
       gap: 1rem;
     }
 
-    .header h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
 
     .header-right {
       display: flex;
@@ -87,17 +84,8 @@
       text-align: center;
     }
 
-    .summary-card .count {
-      font-size: 2rem;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-
-    .summary-card .label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 0.25rem;
-    }
+    .summary-card .count { font-size: 2rem; font-weight: 700; line-height: 1.2; }
+    .summary-card .label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
 
     .count-operational { color: var(--green); }
     .count-degraded { color: var(--yellow); }
@@ -131,32 +119,15 @@
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: rgba(255,255,255,0.02); }
 
-    td {
-      padding: 0.7rem 1rem;
-      font-size: 0.9rem;
-      vertical-align: middle;
-    }
+    td { padding: 0.7rem 1rem; font-size: 0.9rem; vertical-align: middle; }
 
-    .service-name {
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .service-name a {
-      color: var(--text);
-      text-decoration: none;
-    }
-
+    .service-name { font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+    .service-name a { color: var(--text); text-decoration: none; }
     .service-name a:hover { color: var(--blue); }
 
     .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-      flex-shrink: 0;
+      width: 10px; height: 10px; border-radius: 50%;
+      display: inline-block; flex-shrink: 0;
     }
 
     .dot-operational { background: var(--green); }
@@ -166,10 +137,7 @@
     .dot-loading { background: var(--text-muted); animation: pulse 1.5s infinite; }
     .dot-error { background: var(--border); }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     .status-text { font-size: 0.85rem; }
     .status-text.operational { color: var(--green); }
@@ -179,14 +147,25 @@
     .status-text.loading { color: var(--text-muted); }
     .status-text.error { color: var(--text-muted); }
 
-    .category-label {
-      font-size: 0.75rem;
+    .category-label { font-size: 0.75rem; color: var(--text-muted); }
+    .updated-at { font-size: 0.8rem; color: var(--text-muted); }
+
+    .proxy-note {
+      max-width: 1100px;
+      margin: 1rem auto 0;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.8rem;
       color: var(--text-muted);
     }
 
-    .updated-at {
-      font-size: 0.8rem;
-      color: var(--text-muted);
+    .proxy-note code {
+      background: rgba(255,255,255,0.06);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
     }
 
     @media (max-width: 700px) {
@@ -240,151 +219,314 @@
   <tbody id="status-body"></tbody>
 </table>
 
+<div class="proxy-note" id="proxy-note" style="display:none">
+  Some services block browser requests (CORS). To enable all services, deploy a
+  <a href="https://github.com/Zibri/cloudflare-cors-anywhere" target="_blank" style="color:var(--blue)">Cloudflare Worker CORS proxy</a>
+  and set <code>?proxy=https://your-worker.workers.dev</code> in the URL.
+</div>
+
 <script>
-const CORS_PROXY = "https://corsproxy.io/?url=";
+// ── Configuration ───────────────────────────────────────────────────────
+
+// Optional CORS proxy from URL param: ?proxy=https://your-worker.workers.dev
+const PROXY_URL = new URLSearchParams(location.search).get("proxy") || "";
 
 const SERVICES = [
-  // --- Statuspage API (direct CORS-friendly fetch) ---
+  // ── Statuspage API (direct, CORS-friendly) ────────────────────────────
   {
     name: "GitHub",
     category: "Source Control",
     statusUrl: "https://www.githubstatus.com",
-    apiUrl: "https://www.githubstatus.com/api/v2/status.json",
-    type: "statuspage",
+    fetch: fetchStatuspage("https://www.githubstatus.com/api/v2/status.json"),
   },
   {
     name: "Bitbucket",
     category: "Source Control",
     statusUrl: "https://bitbucket.status.atlassian.com",
-    apiUrl: "https://bitbucket.status.atlassian.com/api/v2/status.json",
-    type: "statuspage",
-  },
-  {
-    name: "GitLab",
-    category: "Source Control",
-    statusUrl: "https://status.gitlab.com",
-    apiUrl: "https://status.gitlab.com",
-    type: "scrape",
-    scrapeSelector: "statusTitle",
+    fetch: fetchStatuspage("https://bitbucket.status.atlassian.com/api/v2/status.json"),
   },
   {
     name: "npm Registry",
     category: "Package Registry",
     statusUrl: "https://status.npmjs.org",
-    apiUrl: "https://status.npmjs.org/api/v2/status.json",
-    type: "statuspage",
+    fetch: fetchStatuspage("https://status.npmjs.org/api/v2/status.json"),
   },
   {
     name: "PyPI",
     category: "Package Registry",
     statusUrl: "https://status.python.org",
-    apiUrl: "https://status.python.org/api/v2/status.json",
-    type: "statuspage",
-  },
-  {
-    name: "AWS",
-    category: "Cloud Infrastructure",
-    statusUrl: "https://health.aws.amazon.com/health/status",
-    apiUrl: "https://health.aws.amazon.com/health/status",
-    type: "aws",
-  },
-  {
-    name: "Microsoft Azure",
-    category: "Cloud Infrastructure",
-    statusUrl: "https://azure.status.microsoft/en-us/status",
-    apiUrl: "https://azure.status.microsoft/en-us/status",
-    type: "scrape",
-  },
-  {
-    name: "Google Cloud",
-    category: "Cloud Infrastructure",
-    statusUrl: "https://status.cloud.google.com",
-    apiUrl: "https://status.cloud.google.com",
-    type: "scrape",
-  },
-  {
-    name: "Oracle Cloud",
-    category: "Cloud Infrastructure",
-    statusUrl: "https://ocistatus.oraclecloud.com",
-    apiUrl: "https://ocistatus.oraclecloud.com",
-    type: "scrape",
-  },
-  {
-    name: "Stripe",
-    category: "Payments",
-    statusUrl: "https://status.stripe.com",
-    apiUrl: "https://status.stripe.com",
-    type: "scrape",
-  },
-  {
-    name: "PayPal",
-    category: "Payments",
-    statusUrl: "https://www.paypal-status.com",
-    apiUrl: "https://www.paypal-status.com",
-    type: "scrape",
+    fetch: fetchStatuspage("https://status.python.org/api/v2/status.json"),
   },
   {
     name: "Shopify Payments",
     category: "Payments",
     statusUrl: "https://www.shopifystatus.com",
-    apiUrl: "https://www.shopifystatus.com/api/v2/status.json",
-    type: "statuspage",
+    fetch: fetchStatuspage("https://www.shopifystatus.com/api/v2/status.json"),
   },
   {
     name: "Datadog",
     category: "Observability",
     statusUrl: "https://status.datadoghq.com",
-    apiUrl: "https://status.datadoghq.com/api/v2/status.json",
-    type: "statuspage",
+    fetch: fetchStatuspage("https://status.datadoghq.com/api/v2/status.json"),
   },
   {
     name: "Sentry",
     category: "Observability",
     statusUrl: "https://status.sentry.io",
-    apiUrl: "https://status.sentry.io/api/v2/status.json",
-    type: "statuspage",
+    fetch: fetchStatuspage("https://status.sentry.io/api/v2/status.json"),
   },
   {
     name: "Customer.io",
     category: "Communications",
     statusUrl: "https://status.customerio.com",
-    apiUrl: "https://status.customerio.com/api/v2/status.json",
-    type: "statuspage",
+    fetch: fetchStatuspage("https://status.customerio.com/api/v2/status.json"),
   },
   {
     name: "Twilio",
     category: "Communications",
     statusUrl: "https://status.twilio.com",
-    apiUrl: "https://status.twilio.com/api/v2/status.json",
-    type: "statuspage",
+    fetch: fetchStatuspage("https://status.twilio.com/api/v2/status.json"),
+  },
+
+  // ── Direct APIs with CORS (non-Statuspage) ────────────────────────────
+
+  {
+    name: "GitLab",
+    category: "Source Control",
+    statusUrl: "https://status.gitlab.com",
+    fetch: fetchAtomFeed("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/rss", false),
+  },
+  {
+    name: "Oracle Cloud",
+    category: "Cloud Infrastructure",
+    statusUrl: "https://ocistatus.oraclecloud.com",
+    fetch: fetchAtomFeed("https://ocistatus.oraclecloud.com/api/v2/incident-summary.rss", false),
   },
   {
     name: "Stytch",
     category: "Authentication",
     statusUrl: "https://status.stytch.com",
-    apiUrl: "https://status.stytch.com",
-    type: "scrape",
-  },
-  {
-    name: "Apple Developer",
-    category: "Mobile Platforms",
-    statusUrl: "https://developer.apple.com/system-status/",
-    apiUrl: "https://www.apple.com/support/systemstatus/data/developer/system_status_en_US.js",
-    type: "apple",
+    fetch: fetchInstatus("https://stytch.instatus.com/summary.json"),
   },
   {
     name: "Eve",
     category: "Partner",
     statusUrl: "https://status.eve.co",
-    apiUrl: "https://status.eve.co",
-    type: "scrape",
+    fetch: fetchUptimeRobot("https://status.eve.co/api/getMonitorList/BQLq3SDoBo"),
+  },
+
+  // ── Requires CORS proxy (no browser-friendly API) ─────────────────────
+
+  {
+    name: "Stripe",
+    category: "Payments",
+    statusUrl: "https://status.stripe.com",
+    fetch: fetchStripe("https://status.stripe.com/current"),
+    needsProxy: true,
+  },
+  {
+    name: "PayPal",
+    category: "Payments",
+    statusUrl: "https://www.paypal-status.com",
+    fetch: fetchAtomFeed("https://www.paypal-status.com/feed/atom", true),
+    needsProxy: true,
+  },
+  {
+    name: "AWS",
+    category: "Cloud Infrastructure",
+    statusUrl: "https://health.aws.amazon.com/health/status",
+    fetch: fetchAtomFeed("https://health.aws.amazon.com/health/status", true),
+    needsProxy: true,
+  },
+  {
+    name: "Microsoft Azure",
+    category: "Cloud Infrastructure",
+    statusUrl: "https://azure.status.microsoft/en-us/status",
+    fetch: fetchAtomFeed("https://azurestatuscdn.azureedge.net/en-us/status/feed/", true),
+    needsProxy: true,
+  },
+  {
+    name: "Google Cloud",
+    category: "Cloud Infrastructure",
+    statusUrl: "https://status.cloud.google.com",
+    fetch: fetchAtomFeed("https://status.cloud.google.com/feed.atom", true),
+    needsProxy: true,
+  },
+  {
+    name: "Apple Developer",
+    category: "Mobile Platforms",
+    statusUrl: "https://developer.apple.com/system-status/",
+    fetch: fetchApple("https://www.apple.com/support/systemstatus/data/developer/system_status_en_US.js"),
+    needsProxy: true,
   },
 ];
 
-// Shared state
+// ── State ───────────────────────────────────────────────────────────────
+
 const serviceState = {};
 let countdownSeconds = 60;
 let countdownTimer = null;
+
+// ── Fetcher factories ───────────────────────────────────────────────────
+
+function proxyWrap(url, needsProxy) {
+  if (needsProxy && PROXY_URL) {
+    const sep = PROXY_URL.includes("?") ? "&" : "?";
+    return PROXY_URL + sep + "url=" + encodeURIComponent(url);
+  }
+  return url;
+}
+
+function fetchStatuspage(apiUrl) {
+  return async function () {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const indicator = data.status?.indicator || "none";
+    const description = data.status?.description || "Unknown";
+    const levelMap = { none: "operational", minor: "degraded", major: "partial", critical: "major" };
+    return { level: levelMap[indicator] || "operational", description };
+  };
+}
+
+function fetchInstatus(apiUrl) {
+  return async function () {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const status = data.page?.status || "UNKNOWN";
+    const levelMap = { UP: "operational", HASISSUES: "degraded", UNDERMAINTENANCE: "degraded" };
+    return {
+      level: levelMap[status] || "error",
+      description: status === "UP" ? "All Systems Operational" : status,
+    };
+  };
+}
+
+function fetchUptimeRobot(apiUrl) {
+  return async function () {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const counts = data.statistics?.counts || {};
+    if (counts.down > 0) {
+      return { level: "major", description: `${counts.down} of ${counts.total} monitors down` };
+    }
+    return {
+      level: "operational",
+      description: data.statistics?.count_result || "All monitors up",
+    };
+  };
+}
+
+function fetchStripe(apiUrl) {
+  return async function () {
+    const url = proxyWrap(apiUrl, true);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const levelMap = { up: "operational", degraded: "degraded", down: "major" };
+    return {
+      level: levelMap[data.largestatus] || "error",
+      description: data.message || "Unknown",
+    };
+  };
+}
+
+function fetchAtomFeed(feedUrl, needsProxy) {
+  return async function () {
+    const url = proxyWrap(feedUrl, needsProxy);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+    const parser = new DOMParser();
+
+    // Try XML first (RSS/Atom)
+    const xml = parser.parseFromString(text, "application/xml");
+    const parseError = xml.querySelector("parsererror");
+
+    if (!parseError) {
+      // Look for recent entries (within 24h)
+      const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+      const entries = xml.querySelectorAll("entry, item");
+      const recentIncidents = [];
+
+      for (const entry of entries) {
+        const updated = entry.querySelector("updated, pubDate");
+        if (updated) {
+          const date = new Date(updated.textContent.trim());
+          if (date.getTime() > oneDayAgo) {
+            const title = entry.querySelector("title")?.textContent?.trim() || "";
+            recentIncidents.push(title);
+          }
+        }
+      }
+
+      if (recentIncidents.length === 0) {
+        return { level: "operational", description: "No recent incidents" };
+      }
+
+      const latest = recentIncidents[0];
+      const level = classifyIncidentTitle(latest);
+      return { level, description: latest };
+    }
+
+    // Fallback: parse as HTML and look for status text
+    const html = parser.parseFromString(text, "text/html");
+    const bodyText = html.body?.textContent || "";
+    if (/all systems operational/i.test(bodyText)) {
+      return { level: "operational", description: "All Systems Operational" };
+    }
+    if (/operational/i.test(bodyText)) {
+      return { level: "operational", description: "Operational" };
+    }
+
+    return { level: "error", description: "Could not parse status" };
+  };
+}
+
+function fetchApple(apiUrl) {
+  return async function () {
+    const url = proxyWrap(apiUrl, true);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+
+    // Apple returns JSONP: jsonCallback({...})
+    const match = text.match(/jsonCallback\((.+)\)/s);
+    if (!match) throw new Error("Could not parse JSONP");
+
+    const data = JSON.parse(match[1]);
+    const services = data.services || [];
+    const issues = services.filter(
+      (s) => s.events?.length > 0 && s.events.some((e) => e.statusType !== "resolved")
+    );
+
+    if (issues.length === 0) {
+      return { level: "operational", description: "All Developer Services Operational" };
+    }
+    return { level: "degraded", description: `${issues.length} service(s) with active events` };
+  };
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+
+function classifyIncidentTitle(title) {
+  const t = title.toLowerCase();
+  if (/resolved|completed|scheduled/i.test(t)) return "operational";
+  if (/major|critical|outage/i.test(t)) return "major";
+  if (/partial/i.test(t)) return "partial";
+  if (/degraded|elevated|minor|investigating|monitoring/i.test(t)) return "degraded";
+  return "degraded"; // default for any active incident
+}
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function escapeHtml(s) {
+  const div = document.createElement("div");
+  div.textContent = s;
+  return div.innerHTML;
+}
 
 // ── Rendering ───────────────────────────────────────────────────────────
 
@@ -399,34 +541,19 @@ function renderTable() {
   });
 
   for (const svc of sorted) {
-    const s = serviceState[svc.name] || { level: "loading", description: "Checking...", checkedAt: null };
+    const s = serviceState[svc.name] || { level: "loading", description: "Checking..." };
     const tr = document.createElement("tr");
 
-    const dotClass = {
-      operational: "dot-operational",
-      degraded: "dot-degraded",
-      partial: "dot-partial",
-      major: "dot-major",
-      loading: "dot-loading",
-      error: "dot-error",
-    }[s.level] || "dot-error";
+    const dotMap = {
+      operational: "dot-operational", degraded: "dot-degraded", partial: "dot-partial",
+      major: "dot-major", loading: "dot-loading", error: "dot-error",
+    };
 
-    const textClass = {
-      operational: "operational",
-      degraded: "degraded",
-      partial: "partial",
-      major: "major",
-      loading: "loading",
-      error: "error",
-    }[s.level] || "error";
-
-    const timeStr = s.checkedAt
-      ? new Date(s.checkedAt).toLocaleTimeString()
-      : "-";
+    const timeStr = s.checkedAt ? new Date(s.checkedAt).toLocaleTimeString() : "-";
 
     tr.innerHTML = `
-      <td><div class="service-name"><span class="status-dot ${dotClass}"></span><a href="${svc.statusUrl}" target="_blank" rel="noopener">${svc.name}</a></div></td>
-      <td><span class="status-text ${textClass}">${capitalize(s.level)}</span></td>
+      <td><div class="service-name"><span class="status-dot ${dotMap[s.level] || 'dot-error'}"></span><a href="${svc.statusUrl}" target="_blank" rel="noopener">${svc.name}</a></div></td>
+      <td><span class="status-text ${s.level || 'error'}">${capitalize(s.level || 'error')}</span></td>
       <td>${escapeHtml(s.description)}</td>
       <td><span class="category-label">${svc.category}</span></td>
       <td><span class="updated-at">${timeStr}</span></td>
@@ -453,182 +580,16 @@ function updateSummary() {
   document.getElementById("count-unknown").textContent = unknown;
 }
 
-// ── Fetchers ────────────────────────────────────────────────────────────
-
-async function fetchStatuspage(svc) {
-  try {
-    const resp = await fetch(svc.apiUrl, { cache: "no-store" });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-    const indicator = data.status?.indicator || "none";
-    const description = data.status?.description || "Unknown";
-    return {
-      level: mapStatuspageIndicator(indicator),
-      description,
-      checkedAt: Date.now(),
-    };
-  } catch (e) {
-    return { level: "error", description: `Failed to fetch: ${e.message}`, checkedAt: Date.now() };
-  }
-}
-
-function mapStatuspageIndicator(indicator) {
-  switch (indicator) {
-    case "none": return "operational";
-    case "minor": return "degraded";
-    case "major": return "partial";
-    case "critical": return "major";
-    default: return "operational";
-  }
-}
-
-async function fetchViaCorsProxy(svc) {
-  try {
-    const url = CORS_PROXY + encodeURIComponent(svc.apiUrl);
-    const resp = await fetch(url, { cache: "no-store" });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const html = await resp.text();
-    return parseStatusFromHtml(html, svc);
-  } catch (e) {
-    return { level: "error", description: `Proxy fetch failed: ${e.message}`, checkedAt: Date.now() };
-  }
-}
-
-function parseStatusFromHtml(html, svc) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-
-  // Try common Statuspage patterns
-  const selectors = [
-    ".page-status .status",
-    ".status-page__header-title",
-    '[class*="status"] [class*="title"]',
-    ".unresolved-incidents .page-status",
-    ".status-summary__description",
-    '[data-component-status]',
-    ".component-status",
-    "h1",
-  ];
-
-  let statusText = "";
-  for (const sel of selectors) {
-    const el = doc.querySelector(sel);
-    if (el && el.textContent.trim()) {
-      statusText = el.textContent.trim();
-      break;
-    }
-  }
-
-  // Also check meta tags
-  if (!statusText) {
-    const meta = doc.querySelector('meta[name="description"]');
-    if (meta) statusText = meta.getAttribute("content") || "";
-  }
-
-  // Fallback: search body text for known status phrases
-  if (!statusText) {
-    const bodyText = doc.body?.textContent || "";
-    if (/all systems operational/i.test(bodyText)) statusText = "All Systems Operational";
-    else if (/degraded/i.test(bodyText)) statusText = "Degraded Performance";
-    else if (/major outage/i.test(bodyText)) statusText = "Major Outage";
-    else if (/partial outage/i.test(bodyText)) statusText = "Partial Outage";
-    else if (/operational/i.test(bodyText)) statusText = "Operational";
-  }
-
-  return {
-    level: classifyStatusText(statusText),
-    description: statusText || "Could not parse status",
-    checkedAt: Date.now(),
-  };
-}
-
-function classifyStatusText(text) {
-  const t = text.toLowerCase();
-  if (/major outage|major incident|critical/i.test(t)) return "major";
-  if (/partial outage|partial/i.test(t)) return "partial";
-  if (/degraded|minor|elevated/i.test(t)) return "degraded";
-  if (/operational|normal|available|no issues|all (systems|services)/i.test(t)) return "operational";
-  return "error";
-}
-
-async function fetchAws(svc) {
-  try {
-    const url = CORS_PROXY + encodeURIComponent("https://health.aws.amazon.com/health/status");
-    const resp = await fetch(url, { cache: "no-store" });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const text = await resp.text();
-
-    // AWS status page has a JSON data block or we parse the HTML
-    try {
-      const data = JSON.parse(text);
-      if (data.archive) {
-        // AWS returns archive of events; empty = all good
-        const hasActive = data.archive.some(e => e.status !== "resolved");
-        return {
-          level: hasActive ? "degraded" : "operational",
-          description: hasActive ? "Active events detected" : "All Services Operational",
-          checkedAt: Date.now(),
-        };
-      }
-    } catch {
-      // Not JSON, try HTML parsing
-    }
-
-    return parseStatusFromHtml(text, svc);
-  } catch (e) {
-    return { level: "error", description: `Failed to fetch: ${e.message}`, checkedAt: Date.now() };
-  }
-}
-
-async function fetchApple(svc) {
-  try {
-    const url = CORS_PROXY + encodeURIComponent(svc.apiUrl);
-    const resp = await fetch(url, { cache: "no-store" });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const text = await resp.text();
-
-    // Apple returns JSONP-style: jsonCallback({...})
-    const match = text.match(/jsonCallback\((.+)\)/s);
-    if (match) {
-      const data = JSON.parse(match[1]);
-      const services = data.services || [];
-      const issues = services.filter(s =>
-        s.events && s.events.length > 0 &&
-        s.events.some(e => e.statusType !== "resolved")
-      );
-      if (issues.length === 0) {
-        return { level: "operational", description: "All Developer Services Operational", checkedAt: Date.now() };
-      }
-      return {
-        level: "degraded",
-        description: `${issues.length} service(s) with active events`,
-        checkedAt: Date.now(),
-      };
-    }
-
-    return { level: "error", description: "Could not parse Apple status", checkedAt: Date.now() };
-  } catch (e) {
-    return { level: "error", description: `Failed to fetch: ${e.message}`, checkedAt: Date.now() };
-  }
-}
-
-async function fetchService(svc) {
-  switch (svc.type) {
-    case "statuspage": return fetchStatuspage(svc);
-    case "scrape": return fetchViaCorsProxy(svc);
-    case "aws": return fetchAws(svc);
-    case "apple": return fetchApple(svc);
-    default: return { level: "error", description: "Unknown service type", checkedAt: Date.now() };
-  }
-}
-
 // ── Main loop ───────────────────────────────────────────────────────────
 
 async function fetchAll() {
-  // Reset countdown
   countdownSeconds = 60;
 
-  // Initialize loading state for services not yet fetched
+  // Show proxy note if any service needs a proxy and none is configured
+  const needsProxy = SERVICES.some((s) => s.needsProxy);
+  document.getElementById("proxy-note").style.display =
+    needsProxy && !PROXY_URL ? "block" : "none";
+
   for (const svc of SERVICES) {
     if (!serviceState[svc.name]) {
       serviceState[svc.name] = { level: "loading", description: "Checking...", checkedAt: null };
@@ -636,11 +597,29 @@ async function fetchAll() {
   }
   renderTable();
 
-  // Fetch all in parallel
   const promises = SERVICES.map(async (svc) => {
-    const result = await fetchService(svc);
-    serviceState[svc.name] = result;
-    renderTable(); // Update as each completes
+    // Skip proxy-dependent services if no proxy configured
+    if (svc.needsProxy && !PROXY_URL) {
+      serviceState[svc.name] = {
+        level: "error",
+        description: "Needs CORS proxy",
+        checkedAt: Date.now(),
+      };
+      renderTable();
+      return;
+    }
+
+    try {
+      const result = await svc.fetch();
+      serviceState[svc.name] = { ...result, checkedAt: Date.now() };
+    } catch (e) {
+      serviceState[svc.name] = {
+        level: "error",
+        description: `Failed: ${e.message}`,
+        checkedAt: Date.now(),
+      };
+    }
+    renderTable();
   });
 
   await Promise.allSettled(promises);
@@ -650,26 +629,11 @@ async function fetchAll() {
 function startCountdown() {
   if (countdownTimer) clearInterval(countdownTimer);
   countdownSeconds = 60;
-
   countdownTimer = setInterval(() => {
     countdownSeconds--;
     document.getElementById("countdown").textContent = `Refreshing in ${countdownSeconds}s`;
-    if (countdownSeconds <= 0) {
-      fetchAll();
-    }
+    if (countdownSeconds <= 0) fetchAll();
   }, 1000);
-}
-
-// ── Utilities ───────────────────────────────────────────────────────────
-
-function capitalize(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function escapeHtml(s) {
-  const div = document.createElement("div");
-  div.textContent = s;
-  return div.innerHTML;
 }
 
 // ── Init ────────────────────────────────────────────────────────────────
