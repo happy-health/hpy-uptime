@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Health - Dependency Status</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --orange: #db6d28;
+      --red: #f85149;
+      --blue: #58a6ff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .header {
+      max-width: 1100px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .refresh-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .refresh-bar button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .refresh-bar button:hover { color: var(--text); border-color: var(--text-muted); }
+
+    .summary {
+      max-width: 1100px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+    }
+
+    .summary-card .count {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .summary-card .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .count-operational { color: var(--green); }
+    .count-degraded { color: var(--yellow); }
+    .count-outage { color: var(--red); }
+    .count-unknown { color: var(--text-muted); }
+
+    table {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+    td {
+      padding: 0.7rem 1rem;
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    .service-name {
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .service-name a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .service-name a:hover { color: var(--blue); }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .dot-operational { background: var(--green); }
+    .dot-degraded { background: var(--yellow); }
+    .dot-partial { background: var(--orange); }
+    .dot-major { background: var(--red); }
+    .dot-loading { background: var(--text-muted); animation: pulse 1.5s infinite; }
+    .dot-error { background: var(--border); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .status-text { font-size: 0.85rem; }
+    .status-text.operational { color: var(--green); }
+    .status-text.degraded { color: var(--yellow); }
+    .status-text.partial { color: var(--orange); }
+    .status-text.major { color: var(--red); }
+    .status-text.loading { color: var(--text-muted); }
+    .status-text.error { color: var(--text-muted); }
+
+    .category-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .updated-at {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 700px) {
+      body { padding: 1rem; }
+      .header { flex-direction: column; align-items: flex-start; }
+      td, th { padding: 0.5rem 0.6rem; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Happy Health &mdash; Dependency Status</h1>
+  <div class="header-right">
+    <div class="refresh-bar">
+      <span id="countdown">Refreshing in 60s</span>
+      <button onclick="fetchAll()">Refresh now</button>
+    </div>
+  </div>
+</div>
+
+<div class="summary">
+  <div class="summary-card">
+    <div class="count count-operational" id="count-up">-</div>
+    <div class="label">Operational</div>
+  </div>
+  <div class="summary-card">
+    <div class="count count-degraded" id="count-degraded">-</div>
+    <div class="label">Degraded</div>
+  </div>
+  <div class="summary-card">
+    <div class="count count-outage" id="count-outage">-</div>
+    <div class="label">Outage</div>
+  </div>
+  <div class="summary-card">
+    <div class="count count-unknown" id="count-unknown">-</div>
+    <div class="label">Unknown</div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Service</th>
+      <th>Status</th>
+      <th>Description</th>
+      <th>Category</th>
+      <th>Last Checked</th>
+    </tr>
+  </thead>
+  <tbody id="status-body"></tbody>
+</table>
+
+<script>
+const CORS_PROXY = "https://corsproxy.io/?url=";
+
+const SERVICES = [
+  // --- Statuspage API (direct CORS-friendly fetch) ---
+  {
+    name: "GitHub",
+    category: "Source Control",
+    statusUrl: "https://www.githubstatus.com",
+    apiUrl: "https://www.githubstatus.com/api/v2/status.json",
+    type: "statuspage",
+  },
+  {
+    name: "Bitbucket",
+    category: "Source Control",
+    statusUrl: "https://bitbucket.status.atlassian.com",
+    apiUrl: "https://bitbucket.status.atlassian.com/api/v2/status.json",
+    type: "statuspage",
+  },
+  {
+    name: "GitLab",
+    category: "Source Control",
+    statusUrl: "https://status.gitlab.com",
+    apiUrl: "https://status.gitlab.com",
+    type: "scrape",
+    scrapeSelector: "statusTitle",
+  },
+  {
+    name: "npm Registry",
+    category: "Package Registry",
+    statusUrl: "https://status.npmjs.org",
+    apiUrl: "https://status.npmjs.org/api/v2/status.json",
+    type: "statuspage",
+  },
+  {
+    name: "PyPI",
+    category: "Package Registry",
+    statusUrl: "https://status.python.org",
+    apiUrl: "https://status.python.org/api/v2/status.json",
+    type: "statuspage",
+  },
+  {
+    name: "AWS",
+    category: "Cloud Infrastructure",
+    statusUrl: "https://health.aws.amazon.com/health/status",
+    apiUrl: "https://health.aws.amazon.com/health/status",
+    type: "aws",
+  },
+  {
+    name: "Microsoft Azure",
+    category: "Cloud Infrastructure",
+    statusUrl: "https://azure.status.microsoft/en-us/status",
+    apiUrl: "https://azure.status.microsoft/en-us/status",
+    type: "scrape",
+  },
+  {
+    name: "Google Cloud",
+    category: "Cloud Infrastructure",
+    statusUrl: "https://status.cloud.google.com",
+    apiUrl: "https://status.cloud.google.com",
+    type: "scrape",
+  },
+  {
+    name: "Oracle Cloud",
+    category: "Cloud Infrastructure",
+    statusUrl: "https://ocistatus.oraclecloud.com",
+    apiUrl: "https://ocistatus.oraclecloud.com",
+    type: "scrape",
+  },
+  {
+    name: "Stripe",
+    category: "Payments",
+    statusUrl: "https://status.stripe.com",
+    apiUrl: "https://status.stripe.com",
+    type: "scrape",
+  },
+  {
+    name: "PayPal",
+    category: "Payments",
+    statusUrl: "https://www.paypal-status.com",
+    apiUrl: "https://www.paypal-status.com",
+    type: "scrape",
+  },
+  {
+    name: "Shopify Payments",
+    category: "Payments",
+    statusUrl: "https://www.shopifystatus.com",
+    apiUrl: "https://www.shopifystatus.com/api/v2/status.json",
+    type: "statuspage",
+  },
+  {
+    name: "Datadog",
+    category: "Observability",
+    statusUrl: "https://status.datadoghq.com",
+    apiUrl: "https://status.datadoghq.com/api/v2/status.json",
+    type: "statuspage",
+  },
+  {
+    name: "Sentry",
+    category: "Observability",
+    statusUrl: "https://status.sentry.io",
+    apiUrl: "https://status.sentry.io/api/v2/status.json",
+    type: "statuspage",
+  },
+  {
+    name: "Customer.io",
+    category: "Communications",
+    statusUrl: "https://status.customerio.com",
+    apiUrl: "https://status.customerio.com/api/v2/status.json",
+    type: "statuspage",
+  },
+  {
+    name: "Twilio",
+    category: "Communications",
+    statusUrl: "https://status.twilio.com",
+    apiUrl: "https://status.twilio.com/api/v2/status.json",
+    type: "statuspage",
+  },
+  {
+    name: "Stytch",
+    category: "Authentication",
+    statusUrl: "https://status.stytch.com",
+    apiUrl: "https://status.stytch.com",
+    type: "scrape",
+  },
+  {
+    name: "Apple Developer",
+    category: "Mobile Platforms",
+    statusUrl: "https://developer.apple.com/system-status/",
+    apiUrl: "https://www.apple.com/support/systemstatus/data/developer/system_status_en_US.js",
+    type: "apple",
+  },
+  {
+    name: "Eve",
+    category: "Partner",
+    statusUrl: "https://status.eve.co",
+    apiUrl: "https://status.eve.co",
+    type: "scrape",
+  },
+];
+
+// Shared state
+const serviceState = {};
+let countdownSeconds = 60;
+let countdownTimer = null;
+
+// ── Rendering ───────────────────────────────────────────────────────────
+
+function renderTable() {
+  const tbody = document.getElementById("status-body");
+  tbody.innerHTML = "";
+
+  const sorted = [...SERVICES].sort((a, b) => {
+    if (a.category < b.category) return -1;
+    if (a.category > b.category) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  for (const svc of sorted) {
+    const s = serviceState[svc.name] || { level: "loading", description: "Checking...", checkedAt: null };
+    const tr = document.createElement("tr");
+
+    const dotClass = {
+      operational: "dot-operational",
+      degraded: "dot-degraded",
+      partial: "dot-partial",
+      major: "dot-major",
+      loading: "dot-loading",
+      error: "dot-error",
+    }[s.level] || "dot-error";
+
+    const textClass = {
+      operational: "operational",
+      degraded: "degraded",
+      partial: "partial",
+      major: "major",
+      loading: "loading",
+      error: "error",
+    }[s.level] || "error";
+
+    const timeStr = s.checkedAt
+      ? new Date(s.checkedAt).toLocaleTimeString()
+      : "-";
+
+    tr.innerHTML = `
+      <td><div class="service-name"><span class="status-dot ${dotClass}"></span><a href="${svc.statusUrl}" target="_blank" rel="noopener">${svc.name}</a></div></td>
+      <td><span class="status-text ${textClass}">${capitalize(s.level)}</span></td>
+      <td>${escapeHtml(s.description)}</td>
+      <td><span class="category-label">${svc.category}</span></td>
+      <td><span class="updated-at">${timeStr}</span></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  updateSummary();
+}
+
+function updateSummary() {
+  let up = 0, degraded = 0, outage = 0, unknown = 0;
+  for (const svc of SERVICES) {
+    const s = serviceState[svc.name];
+    if (!s || s.level === "loading" || s.level === "error") { unknown++; continue; }
+    if (s.level === "operational") up++;
+    else if (s.level === "degraded" || s.level === "partial") degraded++;
+    else if (s.level === "major") outage++;
+    else unknown++;
+  }
+  document.getElementById("count-up").textContent = up;
+  document.getElementById("count-degraded").textContent = degraded;
+  document.getElementById("count-outage").textContent = outage;
+  document.getElementById("count-unknown").textContent = unknown;
+}
+
+// ── Fetchers ────────────────────────────────────────────────────────────
+
+async function fetchStatuspage(svc) {
+  try {
+    const resp = await fetch(svc.apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const indicator = data.status?.indicator || "none";
+    const description = data.status?.description || "Unknown";
+    return {
+      level: mapStatuspageIndicator(indicator),
+      description,
+      checkedAt: Date.now(),
+    };
+  } catch (e) {
+    return { level: "error", description: `Failed to fetch: ${e.message}`, checkedAt: Date.now() };
+  }
+}
+
+function mapStatuspageIndicator(indicator) {
+  switch (indicator) {
+    case "none": return "operational";
+    case "minor": return "degraded";
+    case "major": return "partial";
+    case "critical": return "major";
+    default: return "operational";
+  }
+}
+
+async function fetchViaCorsProxy(svc) {
+  try {
+    const url = CORS_PROXY + encodeURIComponent(svc.apiUrl);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const html = await resp.text();
+    return parseStatusFromHtml(html, svc);
+  } catch (e) {
+    return { level: "error", description: `Proxy fetch failed: ${e.message}`, checkedAt: Date.now() };
+  }
+}
+
+function parseStatusFromHtml(html, svc) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+
+  // Try common Statuspage patterns
+  const selectors = [
+    ".page-status .status",
+    ".status-page__header-title",
+    '[class*="status"] [class*="title"]',
+    ".unresolved-incidents .page-status",
+    ".status-summary__description",
+    '[data-component-status]',
+    ".component-status",
+    "h1",
+  ];
+
+  let statusText = "";
+  for (const sel of selectors) {
+    const el = doc.querySelector(sel);
+    if (el && el.textContent.trim()) {
+      statusText = el.textContent.trim();
+      break;
+    }
+  }
+
+  // Also check meta tags
+  if (!statusText) {
+    const meta = doc.querySelector('meta[name="description"]');
+    if (meta) statusText = meta.getAttribute("content") || "";
+  }
+
+  // Fallback: search body text for known status phrases
+  if (!statusText) {
+    const bodyText = doc.body?.textContent || "";
+    if (/all systems operational/i.test(bodyText)) statusText = "All Systems Operational";
+    else if (/degraded/i.test(bodyText)) statusText = "Degraded Performance";
+    else if (/major outage/i.test(bodyText)) statusText = "Major Outage";
+    else if (/partial outage/i.test(bodyText)) statusText = "Partial Outage";
+    else if (/operational/i.test(bodyText)) statusText = "Operational";
+  }
+
+  return {
+    level: classifyStatusText(statusText),
+    description: statusText || "Could not parse status",
+    checkedAt: Date.now(),
+  };
+}
+
+function classifyStatusText(text) {
+  const t = text.toLowerCase();
+  if (/major outage|major incident|critical/i.test(t)) return "major";
+  if (/partial outage|partial/i.test(t)) return "partial";
+  if (/degraded|minor|elevated/i.test(t)) return "degraded";
+  if (/operational|normal|available|no issues|all (systems|services)/i.test(t)) return "operational";
+  return "error";
+}
+
+async function fetchAws(svc) {
+  try {
+    const url = CORS_PROXY + encodeURIComponent("https://health.aws.amazon.com/health/status");
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+
+    // AWS status page has a JSON data block or we parse the HTML
+    try {
+      const data = JSON.parse(text);
+      if (data.archive) {
+        // AWS returns archive of events; empty = all good
+        const hasActive = data.archive.some(e => e.status !== "resolved");
+        return {
+          level: hasActive ? "degraded" : "operational",
+          description: hasActive ? "Active events detected" : "All Services Operational",
+          checkedAt: Date.now(),
+        };
+      }
+    } catch {
+      // Not JSON, try HTML parsing
+    }
+
+    return parseStatusFromHtml(text, svc);
+  } catch (e) {
+    return { level: "error", description: `Failed to fetch: ${e.message}`, checkedAt: Date.now() };
+  }
+}
+
+async function fetchApple(svc) {
+  try {
+    const url = CORS_PROXY + encodeURIComponent(svc.apiUrl);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+
+    // Apple returns JSONP-style: jsonCallback({...})
+    const match = text.match(/jsonCallback\((.+)\)/s);
+    if (match) {
+      const data = JSON.parse(match[1]);
+      const services = data.services || [];
+      const issues = services.filter(s =>
+        s.events && s.events.length > 0 &&
+        s.events.some(e => e.statusType !== "resolved")
+      );
+      if (issues.length === 0) {
+        return { level: "operational", description: "All Developer Services Operational", checkedAt: Date.now() };
+      }
+      return {
+        level: "degraded",
+        description: `${issues.length} service(s) with active events`,
+        checkedAt: Date.now(),
+      };
+    }
+
+    return { level: "error", description: "Could not parse Apple status", checkedAt: Date.now() };
+  } catch (e) {
+    return { level: "error", description: `Failed to fetch: ${e.message}`, checkedAt: Date.now() };
+  }
+}
+
+async function fetchService(svc) {
+  switch (svc.type) {
+    case "statuspage": return fetchStatuspage(svc);
+    case "scrape": return fetchViaCorsProxy(svc);
+    case "aws": return fetchAws(svc);
+    case "apple": return fetchApple(svc);
+    default: return { level: "error", description: "Unknown service type", checkedAt: Date.now() };
+  }
+}
+
+// ── Main loop ───────────────────────────────────────────────────────────
+
+async function fetchAll() {
+  // Reset countdown
+  countdownSeconds = 60;
+
+  // Initialize loading state for services not yet fetched
+  for (const svc of SERVICES) {
+    if (!serviceState[svc.name]) {
+      serviceState[svc.name] = { level: "loading", description: "Checking...", checkedAt: null };
+    }
+  }
+  renderTable();
+
+  // Fetch all in parallel
+  const promises = SERVICES.map(async (svc) => {
+    const result = await fetchService(svc);
+    serviceState[svc.name] = result;
+    renderTable(); // Update as each completes
+  });
+
+  await Promise.allSettled(promises);
+  renderTable();
+}
+
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownSeconds = 60;
+
+  countdownTimer = setInterval(() => {
+    countdownSeconds--;
+    document.getElementById("countdown").textContent = `Refreshing in ${countdownSeconds}s`;
+    if (countdownSeconds <= 0) {
+      fetchAll();
+    }
+  }, 1000);
+}
+
+// ── Utilities ───────────────────────────────────────────────────────────
+
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function escapeHtml(s) {
+  const div = document.createElement("div");
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+// ── Init ────────────────────────────────────────────────────────────────
+
+fetchAll();
+startCountdown();
+</script>
+</body>
+</html>
