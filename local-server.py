@@ -66,6 +66,53 @@ for name, category, tags in SERVICE_DEFINITIONS:
     for tag in tags:
         TAG_TO_SERVICES.setdefault(tag, []).append((name, category))
 
+# ── Team → Service mappings ──────────────────────────────────────────────
+# Which teams/audiences are affected by each service.
+# Services can appear in multiple teams.
+
+TEAM_MAPPINGS = {
+    "End Users": [
+        "API Gateway", "API (Enso)", "API (CRO)",
+        "Stytch Auth",
+        "Stripe", "Shopify",
+        "DynamoDB", "Supabase",
+        "Twilio",
+        "AWS Lambda", "AWS S3",
+        "Cloudflare", "Vercel",
+        "AWS RDS", "Host Health",
+    ],
+    "Clinicians": [
+        "API Gateway",
+        "Stytch Auth",
+        "Athena Health", "Candid Health", "Healthie", "OpenLoop",
+        "DynamoDB", "Supabase",
+        "Twilio",
+        "AWS RDS", "Host Health",
+    ],
+    "Developers": [
+        "Datadog", "Sentry",
+        "Inngest",
+        "AWS Lambda", "AWS S3",
+        "AWS RDS", "Host Health", "Disk Health",
+        "GitHub", "Bitbucket", "GitLab",
+        "npm Registry", "PyPI",
+        "Cloudflare", "Vercel",
+    ],
+    "Customer Support": [
+        "Slack", "Customer.io", "Twilio",
+        "Datadog", "Sentry",
+        "Stytch Auth",
+        "Stripe", "Shopify",
+        "Athena Health",
+    ],
+}
+
+# Build reverse lookup: service name -> list of audiences
+SERVICE_AUDIENCES = {}
+for team, services in TEAM_MAPPINGS.items():
+    for svc_name in services:
+        SERVICE_AUDIENCES.setdefault(svc_name, []).append(team)
+
 
 # ── Mock data generation ─────────────────────────────────────────────────
 
@@ -123,6 +170,12 @@ def generate_mock_data():
                 "description": f"All {count} monitors OK",
                 "monitor_count": count, "alert_count": 0, "warn_count": 0,
             })
+
+    # Build tags lookup for enrichment
+    tags_by_name = {name: tags for name, _, tags in SERVICE_DEFINITIONS}
+    for svc in services:
+        svc["audiences"] = SERVICE_AUDIENCES.get(svc["name"], [])
+        svc["tags"] = tags_by_name.get(svc["name"], [])
 
     return {
         "services": services,
@@ -201,14 +254,19 @@ def fetch_datadog_monitors():
             level = "operational"
             desc = f"All {stats['total']} monitors OK"
         else:
-            level = "operational"
-            desc = "No monitors found"
+            level = "unknown"
+            desc = "Not monitored in Datadog"
 
         services.append({
             "name": name, "category": category, "level": level,
             "description": desc, "monitor_count": stats["total"],
             "alert_count": stats["alert"], "warn_count": stats["warn"],
         })
+
+    tags_by_name = {name: tags for name, _, tags in SERVICE_DEFINITIONS}
+    for svc in services:
+        svc["audiences"] = SERVICE_AUDIENCES.get(svc["name"], [])
+        svc["tags"] = tags_by_name.get(svc["name"], [])
 
     return {
         "services": services,
