@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Health — Internal Status</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface-hover: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --orange: #db6d28;
+      --red: #f85149;
+      --blue: #58a6ff;
+      --bar-empty: #21262d;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+    }
+
+    .container { max-width: 920px; margin: 0 auto; }
+
+    /* ── Header ──────────────────────────────────────────── */
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .header h1 { font-size: 1.4rem; font-weight: 600; }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .header-right button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .header-right button:hover { color: var(--text); border-color: var(--text-muted); }
+
+    .badge-internal {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(88,166,255,0.15);
+      color: var(--blue);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+    }
+
+    /* ── Login gate ──────────────────────────────────────── */
+
+    .login-gate {
+      max-width: 400px;
+      margin: 10vh auto;
+      text-align: center;
+    }
+
+    .login-gate h2 {
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+    }
+
+    .login-gate p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    #stytch-login {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      min-height: 200px;
+    }
+
+    /* ── Overall banner ──────────────────────────────────── */
+
+    .overall-banner {
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border: 1px solid;
+    }
+
+    .overall-banner .banner-dot {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    .banner-operational { background: rgba(63,185,80,0.08); border-color: rgba(63,185,80,0.3); color: var(--green); }
+    .banner-operational .banner-dot { background: var(--green); }
+    .banner-degraded { background: rgba(210,153,34,0.08); border-color: rgba(210,153,34,0.3); color: var(--yellow); }
+    .banner-degraded .banner-dot { background: var(--yellow); }
+    .banner-outage { background: rgba(248,81,73,0.08); border-color: rgba(248,81,73,0.3); color: var(--red); }
+    .banner-outage .banner-dot { background: var(--red); }
+    .banner-loading { background: var(--surface); border-color: var(--border); color: var(--text-muted); }
+    .banner-loading .banner-dot { background: var(--text-muted); animation: pulse 1.5s infinite; }
+
+    /* ── Summary cards ───────────────────────────────────── */
+
+    .summary {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1.25rem;
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .summary-card .count { font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
+    .summary-card .label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+    .count-operational { color: var(--green); }
+    .count-degraded { color: var(--yellow); }
+    .count-outage { color: var(--red); }
+    .count-unknown { color: var(--text-muted); }
+
+    /* ── Category groups ─────────────────────────────────── */
+
+    .service-group { margin-bottom: 1.75rem; }
+
+    .group-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      padding-left: 0.25rem;
+    }
+
+    .group-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    /* ── Service row ─────────────────────────────────────── */
+
+    .service-row {
+      padding: 0.85rem 1.15rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+
+    .service-row:last-child { border-bottom: none; }
+    .service-row:hover { background: var(--surface-hover); }
+
+    .service-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.2rem;
+    }
+
+    .service-name { font-weight: 500; font-size: 0.9rem; }
+
+    .status-badge {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.15rem 0.55rem;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .status-badge .badge-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+    }
+
+    .badge-operational { color: var(--green); background: rgba(63,185,80,0.1); }
+    .badge-operational .badge-dot { background: var(--green); }
+    .badge-degraded { color: var(--yellow); background: rgba(210,153,34,0.1); }
+    .badge-degraded .badge-dot { background: var(--yellow); }
+    .badge-partial { color: var(--orange); background: rgba(219,109,40,0.1); }
+    .badge-partial .badge-dot { background: var(--orange); }
+    .badge-major { color: var(--red); background: rgba(248,81,73,0.1); }
+    .badge-major .badge-dot { background: var(--red); }
+    .badge-unknown { color: var(--text-muted); background: rgba(139,148,158,0.1); }
+    .badge-unknown .badge-dot { background: var(--text-muted); }
+    .badge-loading { color: var(--text-muted); background: rgba(139,148,158,0.1); }
+    .badge-loading .badge-dot { background: var(--text-muted); animation: pulse 1.5s infinite; }
+
+    .service-detail {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+
+    .monitor-count {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    /* ── Uptime bar ──────────────────────────────────────── */
+
+    .uptime-bar {
+      display: flex;
+      gap: 2px;
+      height: 30px;
+      margin: 0.35rem 0 0.3rem;
+    }
+
+    .bar-segment {
+      flex: 1;
+      border-radius: 2px;
+      transition: opacity 0.12s;
+      position: relative;
+      cursor: default;
+    }
+
+    .bar-segment:hover { opacity: 0.7; }
+
+    .bar-operational { background-color: var(--green); }
+    .bar-degraded { background-color: var(--yellow); }
+    .bar-partial { background-color: var(--orange); }
+    .bar-major { background-color: var(--red); }
+    .bar-unknown { background-color: var(--bar-empty); }
+    .bar-loading { background-color: var(--bar-empty); animation: pulse 1.5s infinite; }
+
+    .bar-segment::after {
+      content: attr(data-tip);
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1c2128;
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      white-space: nowrap;
+      z-index: 20;
+      pointer-events: none;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .bar-segment:hover::after { display: block; }
+
+    .uptime-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .uptime-pct { font-weight: 500; }
+    .uptime-pct.good { color: var(--green); }
+
+    /* ── Footer ──────────────────────────────────────────── */
+
+    .page-footer {
+      margin-top: 2rem;
+      padding: 1rem 0;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .page-footer a { color: var(--blue); text-decoration: none; }
+    .page-footer a:hover { text-decoration: underline; }
+
+    /* ── Animations ──────────────────────────────────────── */
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* ── Responsive ──────────────────────────────────────── */
+
+    @media (max-width: 700px) {
+      body { padding: 1rem 0.75rem; }
+      .header { flex-direction: column; align-items: flex-start; }
+      .summary-card { min-width: 70px; padding: 0.6rem 0.75rem; }
+      .summary-card .count { font-size: 1.3rem; }
+      .service-row { padding: 0.7rem 0.85rem; }
+      .uptime-bar { gap: 1px; height: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Login gate (shown when not authenticated) ──────────── -->
+
+<div class="login-gate" id="login-gate">
+  <h2>Internal Status Dashboard</h2>
+  <p>Sign in with your Happy Health account to view system health from Datadog.</p>
+  <div id="stytch-login"></div>
+</div>
+
+<!-- ── Dashboard (shown after authentication) ─────────────── -->
+
+<div class="container" id="dashboard" style="display:none">
+
+  <div class="header">
+    <h1>
+      Happy Health &mdash; Internal Status
+      <span class="badge-internal">Datadog</span>
+    </h1>
+    <div class="header-right">
+      <span id="user-email" style="font-size:0.75rem"></span>
+      <span id="countdown">Refreshing in 60s</span>
+      <button onclick="fetchStatus()">Refresh now</button>
+      <button onclick="logout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="overall-banner banner-loading" id="overall-banner">
+    <span class="banner-dot"></span>
+    <span id="overall-text">Checking system status&hellip;</span>
+  </div>
+
+  <div class="summary">
+    <div class="summary-card">
+      <div class="count count-operational" id="count-up">&ndash;</div>
+      <div class="label">Operational</div>
+    </div>
+    <div class="summary-card">
+      <div class="count count-degraded" id="count-degraded">&ndash;</div>
+      <div class="label">Degraded</div>
+    </div>
+    <div class="summary-card">
+      <div class="count count-outage" id="count-outage">&ndash;</div>
+      <div class="label">Outage</div>
+    </div>
+    <div class="summary-card">
+      <div class="count count-unknown" id="count-unknown">&ndash;</div>
+      <div class="label">Unknown</div>
+    </div>
+  </div>
+
+  <div id="services"></div>
+
+  <div class="page-footer">
+    <a href="index.html">View public dependency status</a>
+    &nbsp;&middot;&nbsp;
+    Data from <a href="https://app.datadoghq.com" target="_blank" rel="noopener">Datadog</a>
+    &nbsp;&middot;&nbsp;
+    <span id="monitor-count"></span>
+  </div>
+
+</div>
+
+<script>
+// ── Configuration ───────────────────────────────────────────────────────
+//
+// Set these via URL params or replace with your values:
+//   ?api_url=https://api.example.com
+//   ?stytch_token=public-token-live-xxx
+//
+// In production, hardcode these or load from a config endpoint.
+
+const params = new URLSearchParams(location.search);
+const API_BASE_URL = params.get("api_url") || "";
+const STYTCH_PUBLIC_TOKEN = params.get("stytch_token") || "";
+const API_KEY = params.get("api_key") || "";
+const REFRESH_INTERVAL = 60;
+const HISTORY_DAYS = 90;
+const STORAGE_KEY = "hpy-uptime-internal-history";
+
+// ── State ───────────────────────────────────────────────────────────────
+
+let services = [];
+let uptimeHistory = loadHistory();
+let countdownSeconds = REFRESH_INTERVAL;
+let countdownTimer = null;
+let stytchClient = null;
+
+// ── Category display order ──────────────────────────────────────────────
+
+const CATEGORY_ORDER = [
+  "Core Platform", "Authentication", "Healthcare", "Payments",
+  "Database", "Communications", "Observability", "Workflow",
+  "Infrastructure",
+];
+
+// ── Auth ────────────────────────────────────────────────────────────────
+
+async function initAuth() {
+  // If API key is provided directly, skip Stytch auth
+  if (API_KEY) {
+    showDashboard();
+    fetchStatus();
+    return;
+  }
+
+  // If no Stytch token, show a configuration message
+  if (!STYTCH_PUBLIC_TOKEN) {
+    document.getElementById("stytch-login").innerHTML =
+      '<p style="color:var(--text-muted);font-size:0.85rem;padding:1rem">' +
+      'Configure authentication by adding URL parameters:<br><br>' +
+      '<code style="background:rgba(255,255,255,0.06);padding:0.2rem 0.4rem;border-radius:4px;font-size:0.8rem">' +
+      '?api_url=https://your-api.com&amp;stytch_token=public-token-xxx</code><br><br>' +
+      'Or use API key auth:<br>' +
+      '<code style="background:rgba(255,255,255,0.06);padding:0.2rem 0.4rem;border-radius:4px;font-size:0.8rem">' +
+      '?api_url=https://your-api.com&amp;api_key=your-key</code></p>';
+    return;
+  }
+
+  // Load Stytch SDK dynamically
+  const script = document.createElement("script");
+  script.src = "https://js.stytch.com/stytch.js";
+  script.onload = () => {
+    stytchClient = new window.StytchUIClient(STYTCH_PUBLIC_TOKEN);
+
+    // Check existing session
+    const session = stytchClient.session.getSync();
+    if (session) {
+      showDashboard();
+      setUserEmail();
+      fetchStatus();
+      return;
+    }
+
+    // Mount login UI
+    stytchClient.mountLogin({
+      elementId: "#stytch-login",
+      config: {
+        products: ["emailMagicLinks"],
+        emailMagicLinksOptions: {
+          loginRedirectURL: window.location.href,
+          signupRedirectURL: window.location.href,
+        },
+      },
+      callbacks: {
+        onEvent: (event) => {
+          if (event.type === "AUTHENTICATE_FLOW_COMPLETE") {
+            showDashboard();
+            setUserEmail();
+            fetchStatus();
+          }
+        },
+      },
+    });
+  };
+  document.head.appendChild(script);
+}
+
+function showDashboard() {
+  document.getElementById("login-gate").style.display = "none";
+  document.getElementById("dashboard").style.display = "block";
+  startCountdown();
+}
+
+function setUserEmail() {
+  if (!stytchClient) return;
+  const user = stytchClient.user.getSync();
+  if (user?.emails?.[0]?.email) {
+    document.getElementById("user-email").textContent = user.emails[0].email;
+  }
+}
+
+function logout() {
+  if (stytchClient) {
+    stytchClient.session.revoke();
+  }
+  location.reload();
+}
+
+function getAuthHeaders() {
+  const headers = { "Content-Type": "application/json" };
+  if (API_KEY) {
+    headers["API_KEY"] = API_KEY;
+  } else if (stytchClient) {
+    const tokens = stytchClient.session.getTokens();
+    if (tokens?.session_jwt) {
+      headers["Authorization"] = "Bearer " + tokens.session_jwt;
+    }
+  }
+  return headers;
+}
+
+// ── API fetch ───────────────────────────────────────────────────────────
+
+async function fetchStatus() {
+  countdownSeconds = REFRESH_INTERVAL;
+
+  if (!API_BASE_URL) {
+    renderError("No API URL configured. Add ?api_url=https://your-api.com to the URL.");
+    return;
+  }
+
+  try {
+    const resp = await fetch(API_BASE_URL + "/v2/status/internal", {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    });
+
+    if (resp.status === 401 || resp.status === 403) {
+      renderError("Authentication failed. Please sign in again.");
+      return;
+    }
+
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+
+    const data = await resp.json();
+    services = data.services || [];
+
+    // Record today's status in history
+    const today = getDayKey(new Date());
+    for (const svc of services) {
+      if (!uptimeHistory[svc.name]) uptimeHistory[svc.name] = {};
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3, unknown: -1 };
+      const existing = uptimeHistory[svc.name][today];
+      const existingSev = SEVERITY[existing] ?? -1;
+      const newSev = SEVERITY[svc.level] ?? -1;
+      if (newSev > existingSev || existingSev < 0) {
+        uptimeHistory[svc.name][today] = svc.level;
+      }
+    }
+
+    saveHistory();
+    render(data);
+
+    document.getElementById("monitor-count").textContent =
+      data.total_monitors + " Datadog monitors tracked";
+
+  } catch (e) {
+    renderError("Failed to fetch status: " + e.message);
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function escapeHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function getDayKey(date) { return date.toISOString().split("T")[0]; }
+
+function getLast90Days() {
+  const days = [];
+  for (let i = HISTORY_DAYS - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(getDayKey(d));
+  }
+  return days;
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + "T12:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+// ── History (localStorage) ──────────────────────────────────────────────
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveHistory() {
+  try {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 120);
+    const cutoffStr = getDayKey(cutoff);
+    for (const svc of Object.keys(uptimeHistory)) {
+      for (const day of Object.keys(uptimeHistory[svc])) {
+        if (day < cutoffStr) delete uptimeHistory[svc][day];
+      }
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(uptimeHistory));
+  } catch { /* storage unavailable */ }
+}
+
+// ── Rendering ───────────────────────────────────────────────────────────
+
+function render(data) {
+  const container = document.getElementById("services");
+  container.innerHTML = "";
+
+  // Group by category
+  const groups = {};
+  for (const svc of services) {
+    if (!groups[svc.category]) groups[svc.category] = [];
+    groups[svc.category].push(svc);
+  }
+
+  for (const cat of CATEGORY_ORDER) {
+    const svcs = groups[cat];
+    if (!svcs) continue;
+
+    const group = document.createElement("div");
+    group.className = "service-group";
+    group.innerHTML = '<div class="group-title">' + escapeHtml(cat) + "</div>";
+
+    const card = document.createElement("div");
+    card.className = "group-card";
+
+    for (const svc of svcs) {
+      card.appendChild(renderServiceRow(svc));
+    }
+
+    group.appendChild(card);
+    container.appendChild(group);
+  }
+
+  updateSummary();
+  updateBanner();
+}
+
+function renderServiceRow(svc) {
+  const row = document.createElement("div");
+  row.className = "service-row";
+
+  const badgeClass = "badge-" + (svc.level || "unknown");
+  const label = capitalize(svc.level || "unknown");
+
+  let html = '<div class="service-header">';
+  html += '<span class="service-name">' + escapeHtml(svc.name) + "</span>";
+  html += '<span class="status-badge ' + badgeClass + '"><span class="badge-dot"></span>' + label + "</span>";
+  html += "</div>";
+
+  // Detail text
+  if (svc.description) {
+    html += '<div class="service-detail">' + escapeHtml(svc.description) + "</div>";
+  }
+
+  // Uptime bar
+  const days = getLast90Days();
+  const history = uptimeHistory[svc.name] || {};
+  let barHtml = '<div class="uptime-bar">';
+  let totalDays = 0, opDays = 0;
+
+  for (const day of days) {
+    const dayStatus = history[day];
+    const barClass = dayStatus ? "bar-" + dayStatus : "bar-unknown";
+    const tipStatus = dayStatus ? capitalize(dayStatus) : "No data";
+    barHtml += '<div class="bar-segment ' + barClass + '" data-tip="' + formatDate(day) + " \u2014 " + tipStatus + '"></div>';
+    if (dayStatus && dayStatus !== "unknown") {
+      totalDays++;
+      if (dayStatus === "operational") opDays++;
+    }
+  }
+  barHtml += "</div>";
+
+  const pct = totalDays > 0 ? ((opDays / totalDays) * 100).toFixed(2) : null;
+  const pctClass = pct !== null && parseFloat(pct) >= 99 ? "good" : "";
+  const pctText = pct !== null ? pct + "% uptime" : "";
+
+  html += barHtml;
+  html += '<div class="uptime-footer">';
+  html += "<span>90 days ago</span>";
+  html += '<span class="uptime-pct ' + pctClass + '">' + pctText + "</span>";
+  html += "<span>Today</span>";
+  html += "</div>";
+
+  row.innerHTML = html;
+  return row;
+}
+
+function updateSummary() {
+  let up = 0, degraded = 0, outage = 0, unknown = 0;
+  for (const svc of services) {
+    if (svc.level === "operational") up++;
+    else if (svc.level === "degraded" || svc.level === "partial") degraded++;
+    else if (svc.level === "major") outage++;
+    else unknown++;
+  }
+  document.getElementById("count-up").textContent = up;
+  document.getElementById("count-degraded").textContent = degraded;
+  document.getElementById("count-outage").textContent = outage;
+  document.getElementById("count-unknown").textContent = unknown;
+}
+
+function updateBanner() {
+  const banner = document.getElementById("overall-banner");
+  const text = document.getElementById("overall-text");
+
+  if (services.length === 0) {
+    banner.className = "overall-banner banner-loading";
+    text.textContent = "Checking system status\u2026";
+    return;
+  }
+
+  const hasOutage = services.some((s) => s.level === "major");
+  const hasDegraded = services.some((s) => s.level === "degraded" || s.level === "partial");
+
+  if (hasOutage) {
+    banner.className = "overall-banner banner-outage";
+    text.textContent = "Major outage detected on one or more services";
+  } else if (hasDegraded) {
+    banner.className = "overall-banner banner-degraded";
+    text.textContent = "Some systems are experiencing issues";
+  } else {
+    banner.className = "overall-banner banner-operational";
+    text.textContent = "All systems operational";
+  }
+}
+
+function renderError(msg) {
+  const banner = document.getElementById("overall-banner");
+  const text = document.getElementById("overall-text");
+  banner.className = "overall-banner banner-outage";
+  text.textContent = msg;
+}
+
+// ── Countdown ───────────────────────────────────────────────────────────
+
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownSeconds = REFRESH_INTERVAL;
+  countdownTimer = setInterval(() => {
+    countdownSeconds--;
+    document.getElementById("countdown").textContent = "Refreshing in " + countdownSeconds + "s";
+    if (countdownSeconds <= 0) fetchStatus();
+  }, 1000);
+}
+
+// ── Init ────────────────────────────────────────────────────────────────
+
+initAuth();
+</script>
+</body>
+</html>
