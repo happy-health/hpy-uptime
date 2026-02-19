@@ -17,6 +17,7 @@
       --orange: #db6d28;
       --red: #f85149;
       --blue: #58a6ff;
+      --purple: #bc8cff;
       --bar-empty: #21262d;
     }
 
@@ -30,7 +31,7 @@
       padding: 2rem 1.5rem;
     }
 
-    .container { max-width: 920px; margin: 0 auto; }
+    .container { max-width: 1060px; margin: 0 auto; }
 
     /* ── Header ──────────────────────────────────────────── */
 
@@ -132,6 +133,55 @@
     .banner-loading { background: var(--surface); border-color: var(--border); color: var(--text-muted); }
     .banner-loading .banner-dot { background: var(--text-muted); animation: pulse 1.5s infinite; }
 
+    /* ── Mismatch alerts ─────────────────────────────────── */
+
+    .mismatch-alerts { margin-bottom: 1.25rem; }
+
+    .mismatch-alert {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      border: 1px solid;
+    }
+
+    .mismatch-alert .alert-icon {
+      font-size: 1rem;
+      line-height: 1.3;
+      flex-shrink: 0;
+    }
+
+    .mismatch-alert .alert-text strong {
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .mismatch-alert .alert-detail {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    .mismatch-ours-down {
+      background: rgba(248,81,73,0.06);
+      border-color: rgba(248,81,73,0.25);
+      color: var(--red);
+    }
+
+    .mismatch-vendor-down {
+      background: rgba(210,153,34,0.06);
+      border-color: rgba(210,153,34,0.25);
+      color: var(--yellow);
+    }
+
+    .mismatch-both-down {
+      background: rgba(219,109,40,0.06);
+      border-color: rgba(219,109,40,0.25);
+      color: var(--orange);
+    }
+
     /* ── Summary cards ───────────────────────────────────── */
 
     .summary {
@@ -147,17 +197,18 @@
       border-radius: 8px;
       padding: 0.85rem 1.25rem;
       flex: 1;
-      min-width: 120px;
+      min-width: 100px;
       text-align: center;
     }
 
     .summary-card .count { font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
-    .summary-card .label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .summary-card .label { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
 
     .count-operational { color: var(--green); }
     .count-degraded { color: var(--yellow); }
     .count-outage { color: var(--red); }
     .count-unknown { color: var(--text-muted); }
+    .count-mismatch { color: var(--purple); }
 
     /* ── Category groups ─────────────────────────────────── */
 
@@ -191,6 +242,10 @@
     .service-row:last-child { border-bottom: none; }
     .service-row:hover { background: var(--surface-hover); }
 
+    .service-row.has-mismatch {
+      border-left: 3px solid var(--purple);
+    }
+
     .service-header {
       display: flex;
       justify-content: space-between;
@@ -198,20 +253,45 @@
       margin-bottom: 0.2rem;
     }
 
-    .service-name { font-weight: 500; font-size: 0.9rem; }
+    .service-name {
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .service-name a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .service-name a:hover { color: var(--blue); }
+
+    .status-badges {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
 
     .status-badge {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 500;
       padding: 0.15rem 0.55rem;
       border-radius: 12px;
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.3rem;
     }
 
     .status-badge .badge-dot {
       width: 7px; height: 7px; border-radius: 50%;
+    }
+
+    .badge-label {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-right: 0.15rem;
     }
 
     .badge-operational { color: var(--green); background: rgba(63,185,80,0.1); }
@@ -226,27 +306,33 @@
     .badge-unknown .badge-dot { background: var(--text-muted); }
     .badge-loading { color: var(--text-muted); background: rgba(139,148,158,0.1); }
     .badge-loading .badge-dot { background: var(--text-muted); animation: pulse 1.5s infinite; }
+    .badge-error { color: var(--text-muted); background: rgba(139,148,158,0.1); }
+    .badge-error .badge-dot { background: var(--border); }
 
-    .service-detail {
-      font-size: 0.78rem;
+    /* ── Dual uptime bars ─────────────────────────────────── */
+
+    .bar-pair { margin-top: 0.35rem; }
+
+    .bar-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
       color: var(--text-muted);
-      margin-top: 0.1rem;
+      margin-bottom: 2px;
     }
 
-    .monitor-count {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      opacity: 0.7;
-    }
-
-    /* ── Uptime bar ──────────────────────────────────────── */
+    .bar-label.global-label { color: var(--blue); opacity: 0.7; }
+    .bar-label.ours-label { color: var(--purple); opacity: 0.7; }
 
     .uptime-bar {
       display: flex;
       gap: 2px;
-      height: 30px;
-      margin: 0.35rem 0 0.3rem;
+      height: 20px;
+      margin-bottom: 0.2rem;
     }
+
+    .uptime-bar.single { height: 28px; }
 
     .bar-segment {
       flex: 1;
@@ -297,6 +383,15 @@
     .uptime-pct { font-weight: 500; }
     .uptime-pct.good { color: var(--green); }
 
+    .mismatch-inline {
+      font-size: 0.72rem;
+      color: var(--purple);
+      margin-top: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
     /* ── Footer ──────────────────────────────────────────── */
 
     .page-footer {
@@ -310,6 +405,29 @@
     .page-footer a { color: var(--blue); text-decoration: none; }
     .page-footer a:hover { text-decoration: underline; }
 
+    /* ── Legend ────────────────────────────────────────────── */
+
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .legend-swatch {
+      width: 14px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
     /* ── Animations ──────────────────────────────────────── */
 
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -319,10 +437,12 @@
     @media (max-width: 700px) {
       body { padding: 1rem 0.75rem; }
       .header { flex-direction: column; align-items: flex-start; }
-      .summary-card { min-width: 70px; padding: 0.6rem 0.75rem; }
+      .summary-card { min-width: 60px; padding: 0.6rem 0.75rem; }
       .summary-card .count { font-size: 1.3rem; }
       .service-row { padding: 0.7rem 0.85rem; }
-      .uptime-bar { gap: 1px; height: 24px; }
+      .uptime-bar { gap: 1px; height: 16px; }
+      .uptime-bar.single { height: 22px; }
+      .status-badges { flex-wrap: wrap; }
     }
   </style>
 </head>
@@ -332,7 +452,7 @@
 
 <div class="login-gate" id="login-gate">
   <h2>Internal Status Dashboard</h2>
-  <p>Sign in with your Happy Health account to view system health from Datadog.</p>
+  <p>Sign in with your Happy Health account to view global + internal system health side-by-side.</p>
   <div id="stytch-login"></div>
 </div>
 
@@ -342,13 +462,13 @@
 
   <div class="header">
     <h1>
-      Happy Health &mdash; Internal Status
-      <span class="badge-internal">Datadog</span>
+      Happy Health &mdash; Status
+      <span class="badge-internal">Global + Internal</span>
     </h1>
     <div class="header-right">
       <span id="user-email" style="font-size:0.75rem"></span>
       <span id="countdown">Refreshing in 60s</span>
-      <button onclick="fetchStatus()">Refresh now</button>
+      <button onclick="refreshAll()">Refresh now</button>
       <button onclick="logout()">Sign out</button>
     </div>
   </div>
@@ -357,6 +477,8 @@
     <span class="banner-dot"></span>
     <span id="overall-text">Checking system status&hellip;</span>
   </div>
+
+  <div class="mismatch-alerts" id="mismatch-alerts"></div>
 
   <div class="summary">
     <div class="summary-card">
@@ -372,8 +494,19 @@
       <div class="label">Outage</div>
     </div>
     <div class="summary-card">
-      <div class="count count-unknown" id="count-unknown">&ndash;</div>
-      <div class="label">Unknown</div>
+      <div class="count count-mismatch" id="count-mismatch">&ndash;</div>
+      <div class="label">Mismatch</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--blue);opacity:0.7"></div>
+      <span>Global (vendor status page)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--purple);opacity:0.7"></div>
+      <span>Ours (Datadog monitors)</span>
     </div>
   </div>
 
@@ -382,7 +515,7 @@
   <div class="page-footer">
     <a href="index.html">View public dependency status</a>
     &nbsp;&middot;&nbsp;
-    Data from <a href="https://app.datadoghq.com" target="_blank" rel="noopener">Datadog</a>
+    Data from vendor status pages + <a href="https://app.datadoghq.com" target="_blank" rel="noopener">Datadog</a>
     &nbsp;&middot;&nbsp;
     <span id="monitor-count"></span>
   </div>
@@ -391,48 +524,315 @@
 
 <script>
 // ── Configuration ───────────────────────────────────────────────────────
-//
-// Set these via URL params or replace with your values:
-//   ?api_url=https://api.example.com
-//   ?stytch_token=public-token-live-xxx
-//
-// In production, hardcode these or load from a config endpoint.
 
 const params = new URLSearchParams(location.search);
 const API_BASE_URL = params.get("api_url") || "";
 const STYTCH_PUBLIC_TOKEN = params.get("stytch_token") || "";
 const API_KEY = params.get("api_key") || "";
+const PROXY_URL = params.get("proxy") || "";
 const REFRESH_INTERVAL = 60;
 const HISTORY_DAYS = 90;
-const STORAGE_KEY = "hpy-uptime-internal-history";
+const STORAGE_KEY_GLOBAL = "hpy-uptime-history";
+const STORAGE_KEY_INTERNAL = "hpy-uptime-internal-history";
+
+// ── Mapping: which vendor names correspond to which internal service names ──
+
+const GLOBAL_TO_INTERNAL = {
+  "Stytch": "Stytch Auth",
+  "Athena Health": "Athena Health",
+  "Candid Health": "Candid Health",
+  "Healthie": "Healthie",
+  "Stripe": "Stripe",
+  "Shopify": "Shopify",
+  "Supabase": "Supabase",
+  "Twilio": "Twilio",
+  "Slack": "Slack",
+  "Customer.io": "Customer.io",
+  "Datadog": "Datadog",
+  "Sentry": "Sentry",
+  "Inngest": "Inngest",
+  "Cloudflare": null,
+  "Vercel": null,
+};
+
+const INTERNAL_TO_GLOBAL = {};
+for (const [g, i] of Object.entries(GLOBAL_TO_INTERNAL)) {
+  if (i) INTERNAL_TO_GLOBAL[i] = g;
+}
 
 // ── State ───────────────────────────────────────────────────────────────
 
-let services = [];
-let uptimeHistory = loadHistory();
+const globalState = {};  // vendor name -> { level, description }
+let internalServices = []; // from Datadog API
+let globalHistory = loadStorage(STORAGE_KEY_GLOBAL);
+let internalHistory = loadStorage(STORAGE_KEY_INTERNAL);
 let countdownSeconds = REFRESH_INTERVAL;
 let countdownTimer = null;
 let stytchClient = null;
+let totalMonitors = 0;
 
 // ── Category display order ──────────────────────────────────────────────
 
 const CATEGORY_ORDER = [
   "Core Platform", "Authentication", "Healthcare", "Payments",
-  "Database", "Communications", "Observability", "Workflow",
-  "Infrastructure",
+  "Database", "CMS", "Communications", "Observability", "Workflow",
+  "Infrastructure", "Cloud & Hosting", "Source Control",
+  "Package Registries", "Mobile Platforms", "Partner",
 ];
+
+// ── Global service definitions (from public page) ───────────────────────
+
+const GLOBAL_SERVICES = [
+  sp("AWS", "Cloud & Hosting", "https://health.aws.amazon.com/health/status",
+     null, "https://health.aws.amazon.com/health/status", true, "atom"),
+  sp("Google Cloud", "Cloud & Hosting", "https://status.cloud.google.com",
+     null, "https://status.cloud.google.com/feed.atom", true, "atom"),
+  sp("Microsoft Azure", "Cloud & Hosting", "https://azure.status.microsoft/en-us/status",
+     null, "https://azurestatuscdn.azureedge.net/en-us/status/feed/", true, "atom"),
+  sp("Oracle Cloud", "Cloud & Hosting", "https://ocistatus.oraclecloud.com",
+     null, "https://ocistatus.oraclecloud.com/api/v2/incident-summary.rss", false, "atom"),
+  sp("Cloudflare", "Cloud & Hosting", "https://www.cloudflarestatus.com",
+     "https://www.cloudflarestatus.com"),
+  sp("Vercel", "Cloud & Hosting", "https://www.vercel-status.com",
+     "https://www.vercel-status.com"),
+  {
+    name: "Stytch", category: "Authentication",
+    statusUrl: "https://status.stytch.com",
+    fetch: fetchInstatus("https://stytch.instatus.com/summary.json"),
+  },
+  sp("Candid Health", "Healthcare", "https://status.joincandidhealth.com",
+     "https://status.joincandidhealth.com"),
+  sp("Healthie", "Healthcare", "https://status.gethealthie.com",
+     "https://status.gethealthie.com"),
+  {
+    name: "Athena Health", category: "Healthcare",
+    statusUrl: "https://status.athenahealth.com",
+    fetch: fetchManual(),
+  },
+  {
+    name: "Stripe", category: "Payments",
+    statusUrl: "https://status.stripe.com",
+    fetch: fetchStripe("https://status.stripe.com/current"),
+    needsProxy: true,
+  },
+  sp("Shopify", "Payments", "https://www.shopifystatus.com",
+     "https://www.shopifystatus.com"),
+  {
+    name: "PayPal", category: "Payments",
+    statusUrl: "https://www.paypal-status.com",
+    fetch: fetchAtomFeed("https://www.paypal-status.com/feed/atom", true),
+    needsProxy: true,
+  },
+  sp("Supabase", "Database", "https://status.supabase.com",
+     "https://status.supabase.com"),
+  sp("Sanity", "CMS", "https://www.sanity-status.com",
+     "https://www.sanity-status.com"),
+  sp("Twilio", "Communications", "https://status.twilio.com",
+     "https://status.twilio.com"),
+  {
+    name: "Slack", category: "Communications",
+    statusUrl: "https://slack-status.com",
+    fetch: fetchSlack("https://slack-status.com/api/v2.0.0/current"),
+  },
+  sp("Customer.io", "Communications", "https://status.customerio.com",
+     "https://status.customerio.com"),
+  sp("Segment", "Communications", "https://status.segment.com",
+     "https://status.segment.com"),
+  sp("Datadog", "Observability", "https://status.datadoghq.com",
+     "https://status.datadoghq.com"),
+  sp("Sentry", "Observability", "https://status.sentry.io",
+     "https://status.sentry.io"),
+  sp("Mixpanel", "Observability", "https://www.mixpanelstatus.com",
+     "https://www.mixpanelstatus.com"),
+  sp("Inngest", "Workflow", "https://status.inngest.com",
+     "https://status.inngest.com"),
+  sp("GitHub", "Source Control", "https://www.githubstatus.com",
+     "https://www.githubstatus.com"),
+  sp("Bitbucket", "Source Control", "https://bitbucket.status.atlassian.com",
+     "https://bitbucket.status.atlassian.com"),
+  {
+    name: "GitLab", category: "Source Control",
+    statusUrl: "https://status.gitlab.com",
+    fetch: fetchAtomFeed("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/rss", false),
+  },
+  sp("npm Registry", "Package Registries", "https://status.npmjs.org",
+     "https://status.npmjs.org"),
+  sp("PyPI", "Package Registries", "https://status.python.org",
+     "https://status.python.org"),
+  {
+    name: "Apple Developer", category: "Mobile Platforms",
+    statusUrl: "https://developer.apple.com/system-status/",
+    fetch: fetchApple("https://www.apple.com/support/systemstatus/data/developer/system_status_en_US.js"),
+    needsProxy: true,
+  },
+  {
+    name: "Eve", category: "Partner",
+    statusUrl: "https://status.eve.co",
+    fetch: fetchUptimeRobot("https://status.eve.co/api/getMonitorList/BQLq3SDoBo"),
+  },
+];
+
+function sp(name, category, statusUrl, statuspageBase, feedUrl, needsProxy, feedType) {
+  const svc = { name, category, statusUrl };
+  if (statuspageBase) {
+    svc.fetch = fetchStatuspage(statuspageBase + "/api/v2/status.json");
+    svc.incidentsUrl = statuspageBase + "/api/v2/incidents.json";
+  } else if (feedUrl) {
+    svc.fetch = fetchAtomFeed(feedUrl, !!needsProxy);
+    svc.needsProxy = !!needsProxy;
+  }
+  return svc;
+}
+
+// ── Fetcher factories (same as public page) ─────────────────────────────
+
+function proxyWrap(url, needsProxy) {
+  if (needsProxy && PROXY_URL) {
+    const sep = PROXY_URL.includes("?") ? "&" : "?";
+    return PROXY_URL + sep + "url=" + encodeURIComponent(url);
+  }
+  return url;
+}
+
+function fetchStatuspage(apiUrl) {
+  return async function () {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    const indicator = data.status?.indicator || "none";
+    const description = data.status?.description || "Unknown";
+    const levelMap = { none: "operational", minor: "degraded", major: "partial", critical: "major" };
+    return { level: levelMap[indicator] || "operational", description };
+  };
+}
+
+function fetchInstatus(apiUrl) {
+  return async function () {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    const status = data.page?.status || "UNKNOWN";
+    const levelMap = { UP: "operational", HASISSUES: "degraded", UNDERMAINTENANCE: "degraded" };
+    return {
+      level: levelMap[status] || "error",
+      description: status === "UP" ? "All Systems Operational" : status,
+    };
+  };
+}
+
+function fetchSlack(apiUrl) {
+  return async function () {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    if (data.status === "ok" || (data.active_incidents || []).length === 0) {
+      return { level: "operational", description: "All Systems Operational" };
+    }
+    const inc = data.active_incidents[0];
+    const level = inc.type === "outage" ? "major" : "degraded";
+    return { level, description: inc.title || "Active incident" };
+  };
+}
+
+function fetchUptimeRobot(apiUrl) {
+  return async function () {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    const counts = data.statistics?.counts || {};
+    if (counts.down > 0) {
+      return { level: "major", description: counts.down + " of " + counts.total + " monitors down" };
+    }
+    return { level: "operational", description: "All monitors up" };
+  };
+}
+
+function fetchStripe(apiUrl) {
+  return async function () {
+    const url = proxyWrap(apiUrl, true);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    const levelMap = { up: "operational", degraded: "degraded", down: "major" };
+    return {
+      level: levelMap[data.largestatus] || "error",
+      description: data.message || "Unknown",
+    };
+  };
+}
+
+function fetchAtomFeed(feedUrl, needsProxy) {
+  return async function () {
+    const url = proxyWrap(feedUrl, needsProxy);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const text = await resp.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, "application/xml");
+    if (!xml.querySelector("parsererror")) {
+      const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+      const entries = xml.querySelectorAll("entry, item");
+      const recent = [];
+      for (const entry of entries) {
+        const updated = entry.querySelector("updated, pubDate");
+        if (updated) {
+          const date = new Date(updated.textContent.trim());
+          if (date.getTime() > oneDayAgo) {
+            recent.push(entry.querySelector("title")?.textContent?.trim() || "");
+          }
+        }
+      }
+      if (recent.length === 0) return { level: "operational", description: "No recent incidents" };
+      return { level: classifyIncidentTitle(recent[0]), description: recent[0] };
+    }
+    const html = parser.parseFromString(text, "text/html");
+    const bodyText = html.body?.textContent || "";
+    if (/all systems operational|no issues/i.test(bodyText)) return { level: "operational", description: "All Systems Operational" };
+    if (/operational/i.test(bodyText)) return { level: "operational", description: "Operational" };
+    return { level: "error", description: "Could not parse status" };
+  };
+}
+
+function fetchApple(apiUrl) {
+  return async function () {
+    const url = proxyWrap(apiUrl, true);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const text = await resp.text();
+    const match = text.match(/jsonCallback\((.+)\)/s);
+    if (!match) throw new Error("Could not parse JSONP");
+    const data = JSON.parse(match[1]);
+    const svcs = data.services || [];
+    const issues = svcs.filter(s => s.events?.length > 0 && s.events.some(e => e.statusType !== "resolved"));
+    if (issues.length === 0) return { level: "operational", description: "All Developer Services Operational" };
+    return { level: "degraded", description: issues.length + " service(s) with active events" };
+  };
+}
+
+function fetchManual() {
+  return async function () {
+    return { level: "error", description: "Manual check required (WAF-blocked)" };
+  };
+}
+
+function classifyIncidentTitle(title) {
+  const t = title.toLowerCase();
+  if (/resolved|completed|scheduled/i.test(t)) return "operational";
+  if (/major|critical|outage/i.test(t)) return "major";
+  if (/partial/i.test(t)) return "partial";
+  if (/degraded|elevated|minor|investigating|monitoring/i.test(t)) return "degraded";
+  return "degraded";
+}
 
 // ── Auth ────────────────────────────────────────────────────────────────
 
 async function initAuth() {
-  // If API key is provided directly, skip Stytch auth
   if (API_KEY) {
     showDashboard();
-    fetchStatus();
+    refreshAll();
     return;
   }
 
-  // If no Stytch token, show a configuration message
   if (!STYTCH_PUBLIC_TOKEN) {
     document.getElementById("stytch-login").innerHTML =
       '<p style="color:var(--text-muted);font-size:0.85rem;padding:1rem">' +
@@ -445,22 +845,17 @@ async function initAuth() {
     return;
   }
 
-  // Load Stytch SDK dynamically
   const script = document.createElement("script");
   script.src = "https://js.stytch.com/stytch.js";
   script.onload = () => {
     stytchClient = new window.StytchUIClient(STYTCH_PUBLIC_TOKEN);
-
-    // Check existing session
     const session = stytchClient.session.getSync();
     if (session) {
       showDashboard();
       setUserEmail();
-      fetchStatus();
+      refreshAll();
       return;
     }
-
-    // Mount login UI
     stytchClient.mountLogin({
       elementId: "#stytch-login",
       config: {
@@ -475,7 +870,7 @@ async function initAuth() {
           if (event.type === "AUTHENTICATE_FLOW_COMPLETE") {
             showDashboard();
             setUserEmail();
-            fetchStatus();
+            refreshAll();
           }
         },
       },
@@ -499,9 +894,7 @@ function setUserEmail() {
 }
 
 function logout() {
-  if (stytchClient) {
-    stytchClient.session.revoke();
-  }
+  if (stytchClient) stytchClient.session.revoke();
   location.reload();
 }
 
@@ -516,56 +909,6 @@ function getAuthHeaders() {
     }
   }
   return headers;
-}
-
-// ── API fetch ───────────────────────────────────────────────────────────
-
-async function fetchStatus() {
-  countdownSeconds = REFRESH_INTERVAL;
-
-  if (!API_BASE_URL) {
-    renderError("No API URL configured. Add ?api_url=https://your-api.com to the URL.");
-    return;
-  }
-
-  try {
-    const resp = await fetch(API_BASE_URL + "/v2/status/internal", {
-      headers: getAuthHeaders(),
-      cache: "no-store",
-    });
-
-    if (resp.status === 401 || resp.status === 403) {
-      renderError("Authentication failed. Please sign in again.");
-      return;
-    }
-
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-
-    const data = await resp.json();
-    services = data.services || [];
-
-    // Record today's status in history
-    const today = getDayKey(new Date());
-    for (const svc of services) {
-      if (!uptimeHistory[svc.name]) uptimeHistory[svc.name] = {};
-      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3, unknown: -1 };
-      const existing = uptimeHistory[svc.name][today];
-      const existingSev = SEVERITY[existing] ?? -1;
-      const newSev = SEVERITY[svc.level] ?? -1;
-      if (newSev > existingSev || existingSev < 0) {
-        uptimeHistory[svc.name][today] = svc.level;
-      }
-    }
-
-    saveHistory();
-    render(data);
-
-    document.getElementById("monitor-count").textContent =
-      data.total_monitors + " Datadog monitors tracked";
-
-  } catch (e) {
-    renderError("Failed to fetch status: " + e.message);
-  }
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -597,36 +940,269 @@ function formatDate(dateStr) {
 
 // ── History (localStorage) ──────────────────────────────────────────────
 
-function loadHistory() {
+function loadStorage(key) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : {};
   } catch { return {}; }
 }
 
-function saveHistory() {
+function saveStorage(key, data) {
   try {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 120);
     const cutoffStr = getDayKey(cutoff);
-    for (const svc of Object.keys(uptimeHistory)) {
-      for (const day of Object.keys(uptimeHistory[svc])) {
-        if (day < cutoffStr) delete uptimeHistory[svc][day];
+    for (const svc of Object.keys(data)) {
+      for (const day of Object.keys(data[svc])) {
+        if (day < cutoffStr) delete data[svc][day];
       }
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(uptimeHistory));
+    localStorage.setItem(key, JSON.stringify(data));
   } catch { /* storage unavailable */ }
+}
+
+function recordGlobalStatus(name, level) {
+  const today = getDayKey(new Date());
+  if (!globalHistory[name]) globalHistory[name] = {};
+  const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3, error: -1, loading: -1 };
+  const current = globalHistory[name][today];
+  const curSev = SEVERITY[current] ?? -1;
+  const newSev = SEVERITY[level] ?? -1;
+  if (newSev > curSev || curSev < 0) globalHistory[name][today] = level;
+}
+
+function recordInternalStatus(name, level) {
+  const today = getDayKey(new Date());
+  if (!internalHistory[name]) internalHistory[name] = {};
+  const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3, unknown: -1 };
+  const current = internalHistory[name][today];
+  const curSev = SEVERITY[current] ?? -1;
+  const newSev = SEVERITY[level] ?? -1;
+  if (newSev > curSev || curSev < 0) internalHistory[name][today] = level;
+}
+
+// ── Data fetching ───────────────────────────────────────────────────────
+
+async function fetchGlobalStatuses() {
+  const promises = GLOBAL_SERVICES.map(async (svc) => {
+    if (svc.needsProxy && !PROXY_URL) {
+      globalState[svc.name] = { level: "error", description: "Needs CORS proxy" };
+      return;
+    }
+    try {
+      const result = await svc.fetch();
+      globalState[svc.name] = result;
+      recordGlobalStatus(svc.name, result.level);
+    } catch (e) {
+      globalState[svc.name] = { level: "error", description: "Failed: " + e.message };
+    }
+  });
+  await Promise.allSettled(promises);
+  saveStorage(STORAGE_KEY_GLOBAL, globalHistory);
+}
+
+async function fetchInternalStatuses() {
+  if (!API_BASE_URL) return;
+  try {
+    const resp = await fetch(API_BASE_URL + "/v2/status/internal", {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    });
+    if (resp.status === 401 || resp.status === 403) {
+      renderError("Authentication failed. Please sign in again.");
+      return;
+    }
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    internalServices = data.services || [];
+    totalMonitors = data.total_monitors || 0;
+
+    const today = getDayKey(new Date());
+    for (const svc of internalServices) {
+      recordInternalStatus(svc.name, svc.level);
+    }
+    saveStorage(STORAGE_KEY_INTERNAL, internalHistory);
+  } catch (e) {
+    console.error("Internal status fetch failed:", e);
+    // Don't block rendering — global data still works
+  }
+}
+
+async function refreshAll() {
+  countdownSeconds = REFRESH_INTERVAL;
+
+  // Initialize loading state
+  for (const svc of GLOBAL_SERVICES) {
+    if (!globalState[svc.name]) {
+      globalState[svc.name] = { level: "loading", description: "Checking..." };
+    }
+  }
+
+  render();
+
+  // Fetch both in parallel
+  await Promise.allSettled([
+    fetchGlobalStatuses(),
+    fetchInternalStatuses(),
+  ]);
+
+  render();
+
+  document.getElementById("monitor-count").textContent =
+    totalMonitors ? totalMonitors + " Datadog monitors tracked" : "";
+
+  // Backfill global history
+  populateIncidentHistory();
+}
+
+async function populateIncidentHistory() {
+  const statuspageServices = GLOBAL_SERVICES.filter(s => s.incidentsUrl);
+  if (statuspageServices.length === 0) return;
+
+  const days = getLast90Days();
+  const ninetyDaysAgo = Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000;
+
+  const promises = statuspageServices.map(async (svc) => {
+    try {
+      const resp = await fetch(svc.incidentsUrl, { cache: "no-store" });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (!globalHistory[svc.name]) globalHistory[svc.name] = {};
+      for (const inc of data.incidents || []) {
+        const dateStr = inc.created_at?.split("T")[0];
+        if (!dateStr) continue;
+        if (new Date(dateStr + "T00:00:00").getTime() < ninetyDaysAgo) continue;
+        const impactMap = { none: null, minor: "degraded", major: "partial", critical: "major" };
+        const level = impactMap[inc.impact];
+        if (!level) continue;
+        const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+        const existing = globalHistory[svc.name][dateStr];
+        if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+          globalHistory[svc.name][dateStr] = level;
+        }
+      }
+      for (const day of days) {
+        if (!globalHistory[svc.name][day]) {
+          globalHistory[svc.name][day] = "operational";
+        }
+      }
+    } catch { /* ignore */ }
+  });
+
+  await Promise.allSettled(promises);
+  saveStorage(STORAGE_KEY_GLOBAL, globalHistory);
+  render();
+}
+
+// ── Mismatch detection ──────────────────────────────────────────────────
+
+function detectMismatches() {
+  const mismatches = [];
+  const internalByName = {};
+  for (const svc of internalServices) internalByName[svc.name] = svc;
+
+  for (const [globalName, internalName] of Object.entries(GLOBAL_TO_INTERNAL)) {
+    if (!internalName) continue;
+    const g = globalState[globalName];
+    const i = internalByName[internalName];
+    if (!g || !i) continue;
+    if (g.level === "loading" || g.level === "error") continue;
+
+    const gBad = g.level === "major" || g.level === "partial" || g.level === "degraded";
+    const iBad = i.level === "major" || i.level === "partial" || i.level === "degraded";
+
+    if (!gBad && iBad) {
+      mismatches.push({
+        type: "ours-down",
+        service: globalName,
+        message: globalName + " reports operational, but our Datadog monitors show issues",
+        detail: "Check API keys, rate limits, or configuration. The vendor is fine but our integration is not.",
+        globalLevel: g.level,
+        internalLevel: i.level,
+      });
+    } else if (gBad && !iBad) {
+      mismatches.push({
+        type: "vendor-down",
+        service: globalName,
+        message: globalName + " is reporting issues, but not affecting us yet",
+        detail: "Vendor outage in progress. Monitor for cascading impact.",
+        globalLevel: g.level,
+        internalLevel: i.level,
+      });
+    } else if (gBad && iBad) {
+      mismatches.push({
+        type: "both-down",
+        service: globalName,
+        message: globalName + " outage is affecting our systems",
+        detail: "Vendor issue confirmed + our monitors alerting. Likely caused by the vendor outage.",
+        globalLevel: g.level,
+        internalLevel: i.level,
+      });
+    }
+  }
+
+  return mismatches;
 }
 
 // ── Rendering ───────────────────────────────────────────────────────────
 
-function render(data) {
+function buildUnifiedServiceList() {
+  // Build a unified list: internal services first (with matched global),
+  // then remaining global-only services.
+  const list = [];
+  const usedGlobalNames = new Set();
+  const internalByName = {};
+  for (const svc of internalServices) internalByName[svc.name] = svc;
+
+  // Internal services (may have matched global)
+  for (const intSvc of internalServices) {
+    const globalName = INTERNAL_TO_GLOBAL[intSvc.name];
+    const globalSvc = globalName ? GLOBAL_SERVICES.find(s => s.name === globalName) : null;
+    const gState = globalName ? globalState[globalName] : null;
+
+    list.push({
+      name: intSvc.name,
+      displayName: globalName || intSvc.name,
+      category: intSvc.category,
+      statusUrl: globalSvc?.statusUrl || null,
+      global: gState && gState.level !== "loading" ? gState : null,
+      internal: { level: intSvc.level, description: intSvc.description },
+      globalHistoryKey: globalName,
+      internalHistoryKey: intSvc.name,
+    });
+
+    if (globalName) usedGlobalNames.add(globalName);
+  }
+
+  // Global-only services
+  for (const svc of GLOBAL_SERVICES) {
+    if (usedGlobalNames.has(svc.name)) continue;
+    const gState = globalState[svc.name];
+
+    list.push({
+      name: svc.name,
+      displayName: svc.name,
+      category: svc.category,
+      statusUrl: svc.statusUrl,
+      global: gState || null,
+      internal: null,
+      globalHistoryKey: svc.name,
+      internalHistoryKey: null,
+    });
+  }
+
+  return list;
+}
+
+function render() {
   const container = document.getElementById("services");
   container.innerHTML = "";
 
+  const unified = buildUnifiedServiceList();
+
   // Group by category
   const groups = {};
-  for (const svc of services) {
+  for (const svc of unified) {
     if (!groups[svc.category]) groups[svc.category] = [];
     groups[svc.category].push(svc);
   }
@@ -650,90 +1226,211 @@ function render(data) {
     container.appendChild(group);
   }
 
-  updateSummary();
-  updateBanner();
+  renderMismatchAlerts();
+  updateSummary(unified);
+  updateBanner(unified);
 }
 
 function renderServiceRow(svc) {
   const row = document.createElement("div");
-  row.className = "service-row";
-
-  const badgeClass = "badge-" + (svc.level || "unknown");
-  const label = capitalize(svc.level || "unknown");
+  const hasBoth = svc.global && svc.internal;
+  const mismatch = hasBoth ? getMismatchType(svc) : null;
+  row.className = "service-row" + (mismatch ? " has-mismatch" : "");
 
   let html = '<div class="service-header">';
-  html += '<span class="service-name">' + escapeHtml(svc.name) + "</span>";
-  html += '<span class="status-badge ' + badgeClass + '"><span class="badge-dot"></span>' + label + "</span>";
-  html += "</div>";
 
-  // Detail text
-  if (svc.description) {
-    html += '<div class="service-detail">' + escapeHtml(svc.description) + "</div>";
+  // Name
+  if (svc.statusUrl) {
+    html += '<span class="service-name"><a href="' + svc.statusUrl + '" target="_blank" rel="noopener">' + escapeHtml(svc.displayName) + '</a></span>';
+  } else {
+    html += '<span class="service-name">' + escapeHtml(svc.displayName) + '</span>';
   }
 
-  // Uptime bar
-  const days = getLast90Days();
-  const history = uptimeHistory[svc.name] || {};
-  let barHtml = '<div class="uptime-bar">';
-  let totalDays = 0, opDays = 0;
+  // Badges
+  html += '<span class="status-badges">';
+  if (svc.global) {
+    const gl = svc.global.level === "error" ? "unknown" : (svc.global.level || "loading");
+    html += '<span class="status-badge badge-' + gl + '">';
+    html += '<span class="badge-label">Global</span>';
+    html += '<span class="badge-dot"></span>' + capitalize(gl);
+    html += '</span>';
+  }
+  if (svc.internal) {
+    const il = svc.internal.level || "unknown";
+    html += '<span class="status-badge badge-' + il + '">';
+    html += '<span class="badge-label">Ours</span>';
+    html += '<span class="badge-dot"></span>' + capitalize(il);
+    html += '</span>';
+  }
+  if (!svc.global && !svc.internal) {
+    html += '<span class="status-badge badge-loading"><span class="badge-dot"></span>Loading</span>';
+  }
+  html += '</span>';
+  html += '</div>';
 
+  // Uptime bars
+  const days = getLast90Days();
+
+  if (hasBoth) {
+    // Dual bars
+    html += '<div class="bar-pair">';
+    html += renderUptimeBar(days, svc.globalHistoryKey, globalHistory, "Global", "global-label", false);
+    html += renderUptimeBar(days, svc.internalHistoryKey, internalHistory, "Ours", "ours-label", false);
+    html += '</div>';
+
+    // Mismatch indicator
+    if (mismatch) {
+      html += '<div class="mismatch-inline">';
+      if (mismatch === "ours-down") {
+        html += '&#x26A0; Our integration is down while vendor is healthy';
+      } else if (mismatch === "vendor-down") {
+        html += '&#x1F50D; Vendor issue not yet affecting us';
+      } else if (mismatch === "both-down") {
+        html += '&#x1F6A8; Vendor outage affecting our systems';
+      }
+      html += '</div>';
+    }
+  } else {
+    // Single bar
+    const histKey = svc.globalHistoryKey || svc.internalHistoryKey;
+    const hist = svc.global ? globalHistory : internalHistory;
+    const label = svc.internal ? "Ours" : "Global";
+    html += renderUptimeBar(days, histKey, hist, label, svc.internal ? "ours-label" : "global-label", true);
+  }
+
+  // Footer
+  const histKey = svc.globalHistoryKey || svc.internalHistoryKey;
+  const hist = svc.global ? globalHistory : internalHistory;
+  const history = histKey ? hist[histKey] || {} : {};
+  let totalDays = 0, opDays = 0;
   for (const day of days) {
-    const dayStatus = history[day];
-    const barClass = dayStatus ? "bar-" + dayStatus : "bar-unknown";
-    const tipStatus = dayStatus ? capitalize(dayStatus) : "No data";
-    barHtml += '<div class="bar-segment ' + barClass + '" data-tip="' + formatDate(day) + " \u2014 " + tipStatus + '"></div>';
-    if (dayStatus && dayStatus !== "unknown") {
+    const ds = history[day];
+    if (ds && ds !== "error" && ds !== "unknown") {
       totalDays++;
-      if (dayStatus === "operational") opDays++;
+      if (ds === "operational") opDays++;
     }
   }
-  barHtml += "</div>";
-
   const pct = totalDays > 0 ? ((opDays / totalDays) * 100).toFixed(2) : null;
   const pctClass = pct !== null && parseFloat(pct) >= 99 ? "good" : "";
   const pctText = pct !== null ? pct + "% uptime" : "";
-
-  html += barHtml;
   html += '<div class="uptime-footer">';
-  html += "<span>90 days ago</span>";
-  html += '<span class="uptime-pct ' + pctClass + '">' + pctText + "</span>";
-  html += "<span>Today</span>";
-  html += "</div>";
+  html += '<span>90 days ago</span>';
+  html += '<span class="uptime-pct ' + pctClass + '">' + pctText + '</span>';
+  html += '<span>Today</span>';
+  html += '</div>';
 
   row.innerHTML = html;
   return row;
 }
 
-function updateSummary() {
-  let up = 0, degraded = 0, outage = 0, unknown = 0;
-  for (const svc of services) {
-    if (svc.level === "operational") up++;
-    else if (svc.level === "degraded" || svc.level === "partial") degraded++;
-    else if (svc.level === "major") outage++;
-    else unknown++;
+function renderUptimeBar(days, historyKey, historyObj, label, labelClass, isSingle) {
+  let html = '<div class="bar-label ' + labelClass + '">' + label + '</div>';
+  html += '<div class="uptime-bar' + (isSingle ? ' single' : '') + '">';
+  const history = historyKey ? historyObj[historyKey] || {} : {};
+  for (const day of days) {
+    const ds = history[day];
+    const barClass = ds ? "bar-" + ds : "bar-unknown";
+    const tipStatus = ds ? capitalize(ds) : "No data";
+    html += '<div class="bar-segment ' + barClass + '" data-tip="' + label + ': ' + formatDate(day) + " \u2014 " + tipStatus + '"></div>';
   }
+  html += '</div>';
+  return html;
+}
+
+function getMismatchType(svc) {
+  if (!svc.global || !svc.internal) return null;
+  const gl = svc.global.level;
+  const il = svc.internal.level;
+  if (gl === "loading" || gl === "error") return null;
+
+  const gBad = gl === "major" || gl === "partial" || gl === "degraded";
+  const iBad = il === "major" || il === "partial" || il === "degraded";
+
+  if (!gBad && iBad) return "ours-down";
+  if (gBad && !iBad) return "vendor-down";
+  if (gBad && iBad) return "both-down";
+  return null;
+}
+
+function renderMismatchAlerts() {
+  const container = document.getElementById("mismatch-alerts");
+  const mismatches = detectMismatches();
+  container.innerHTML = "";
+
+  // Only show ours-down as prominent alerts (most actionable)
+  const oursDown = mismatches.filter(m => m.type === "ours-down");
+  for (const m of oursDown) {
+    const div = document.createElement("div");
+    div.className = "mismatch-alert mismatch-ours-down";
+    div.innerHTML =
+      '<span class="alert-icon">&#x26A0;</span>' +
+      '<span class="alert-text"><strong>' + escapeHtml(m.message) + '</strong>' +
+      '<span class="alert-detail">' + escapeHtml(m.detail) + '</span></span>';
+    container.appendChild(div);
+  }
+}
+
+function updateSummary(unified) {
+  let up = 0, degraded = 0, outage = 0, mismatchCount = 0;
+
+  for (const svc of unified) {
+    // Use worst of global + internal
+    const levels = [];
+    if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
+    if (svc.internal) levels.push(svc.internal.level);
+
+    const worst = getWorstLevel(levels);
+    if (worst === "operational") up++;
+    else if (worst === "degraded" || worst === "partial") degraded++;
+    else if (worst === "major") outage++;
+
+    if (getMismatchType(svc)) mismatchCount++;
+  }
+
   document.getElementById("count-up").textContent = up;
   document.getElementById("count-degraded").textContent = degraded;
   document.getElementById("count-outage").textContent = outage;
-  document.getElementById("count-unknown").textContent = unknown;
+  document.getElementById("count-mismatch").textContent = mismatchCount;
 }
 
-function updateBanner() {
+function getWorstLevel(levels) {
+  const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3, unknown: -1 };
+  let worst = "unknown";
+  let worstSev = -1;
+  for (const l of levels) {
+    const s = SEVERITY[l] ?? -1;
+    if (s > worstSev) { worst = l; worstSev = s; }
+  }
+  return worst;
+}
+
+function updateBanner(unified) {
   const banner = document.getElementById("overall-banner");
   const text = document.getElementById("overall-text");
 
-  if (services.length === 0) {
+  const allLevels = [];
+  for (const svc of unified) {
+    if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") allLevels.push(svc.global.level);
+    if (svc.internal) allLevels.push(svc.internal.level);
+  }
+
+  if (allLevels.length === 0) {
     banner.className = "overall-banner banner-loading";
     text.textContent = "Checking system status\u2026";
     return;
   }
 
-  const hasOutage = services.some((s) => s.level === "major");
-  const hasDegraded = services.some((s) => s.level === "degraded" || s.level === "partial");
+  const hasOutage = allLevels.includes("major");
+  const hasDegraded = allLevels.includes("degraded") || allLevels.includes("partial");
+  const mismatches = detectMismatches();
+  const oursDown = mismatches.filter(m => m.type === "ours-down");
 
   if (hasOutage) {
     banner.className = "overall-banner banner-outage";
     text.textContent = "Major outage detected on one or more services";
+  } else if (oursDown.length > 0) {
+    banner.className = "overall-banner banner-outage";
+    text.textContent = oursDown.length + " service(s) with integration issues \u2014 vendors are healthy";
   } else if (hasDegraded) {
     banner.className = "overall-banner banner-degraded";
     text.textContent = "Some systems are experiencing issues";
@@ -758,7 +1455,7 @@ function startCountdown() {
   countdownTimer = setInterval(() => {
     countdownSeconds--;
     document.getElementById("countdown").textContent = "Refreshing in " + countdownSeconds + "s";
-    if (countdownSeconds <= 0) fetchStatus();
+    if (countdownSeconds <= 0) refreshAll();
   }, 1000);
 }
 
