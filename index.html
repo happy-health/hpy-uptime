@@ -404,8 +404,12 @@ const SERVICES = [
      "https://www.sanity-status.com"),
 
   // ── Communications & Analytics ──────────────────────────────────────
-  sp("Twilio", "Communications", "https://status.twilio.com",
-     "https://status.twilio.com"),
+  {
+    name: "Twilio SMS (US)", category: "Communications",
+    statusUrl: "https://status.twilio.com",
+    fetch: fetchTwilioSmsUs(),
+    incidentsUrl: "https://status.twilio.com/api/v2/incidents.json",
+  },
   {
     name: "Slack", category: "Communications",
     statusUrl: "https://slack-status.com",
@@ -521,6 +525,43 @@ function fetchInstatus(apiUrl) {
     return {
       level: levelMap[status] || "error",
       description: status === "UP" ? "All Systems Operational" : status,
+    };
+  };
+}
+
+// Twilio SMS (US) — only monitors SMS/MMS components in North America
+const TWILIO_SMS_US_COMPONENT_IDS = [
+  "yvvy3vlp4djf", // SMS (Programmable Messaging)
+  "d1j2nx64rpq3", // MMS (Programmable Messaging)
+  "x3z86l06nvl7", // Programmable Messaging API
+  "7d8w22hqrh6s", // SMS Long Code, North America
+  "39mb8cmw8y2v", // SMS Short Code, North America
+  "32f2bm54nkvv", // SMS Toll-Free, North America
+  "8vdlvw3dsq8h", // MMS Long Code, North America
+  "tvjwfvczkf46", // MMS Toll-Free, North America
+];
+
+function fetchTwilioSmsUs() {
+  const apiUrl = "https://status.twilio.com/api/v2/components.json";
+  const idSet = new Set(TWILIO_SMS_US_COMPONENT_IDS);
+  return async function () {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    const components = (data.components || []).filter(c => idSet.has(c.id));
+    const statusMap = { operational: 0, degraded_performance: 1, partial_outage: 2, major_outage: 3 };
+    const levelMap = { operational: "operational", degraded_performance: "degraded", partial_outage: "partial", major_outage: "major" };
+    let worstStatus = "operational";
+    let worstSev = 0;
+    const issues = [];
+    for (const c of components) {
+      const sev = statusMap[c.status] ?? 0;
+      if (sev > worstSev) { worstSev = sev; worstStatus = c.status; }
+      if (sev > 0) issues.push(c.name + ": " + c.status.replace(/_/g, " "));
+    }
+    return {
+      level: levelMap[worstStatus] || "operational",
+      description: issues.length > 0 ? issues.join("; ") : "All SMS systems operational",
     };
   };
 }
