@@ -38,7 +38,6 @@ SERVICE_DEFINITIONS = [
     ("API (Enso)",    "Core Platform",    ["service:hpy-api-enso"]),
     ("API (CRO)",     "Core Platform",    ["service:hpy-api-cro"]),
     ("Stytch Auth",   "Authentication",   ["service:stytch"]),
-    ("Athena Health", "Healthcare",       ["service:athena"]),
     ("Candid Health", "Healthcare",       ["service:candid"]),
     ("Healthie",      "Healthcare",       ["service:healthie"]),
     ("OpenLoop",      "Healthcare",       ["service:openloop"]),
@@ -84,7 +83,7 @@ TEAM_MAPPINGS = {
     "Clinicians": [
         "API Gateway",
         "Stytch Auth",
-        "Athena Health", "Candid Health", "Healthie", "OpenLoop",
+        "Candid Health", "Healthie", "OpenLoop",
         "DynamoDB", "Supabase",
         "Twilio",
         "AWS RDS", "Host Health",
@@ -103,7 +102,6 @@ TEAM_MAPPINGS = {
         "Datadog", "Sentry",
         "Stytch Auth",
         "Stripe", "Shopify",
-        "Athena Health",
     ],
 }
 
@@ -119,7 +117,7 @@ for team, services in TEAM_MAPPINGS.items():
 # Realistic monitor counts per service
 MOCK_MONITOR_COUNTS = {
     "API Gateway": 5, "API (Enso)": 3, "API (CRO)": 2,
-    "Stytch Auth": 2, "Athena Health": 3, "Candid Health": 2,
+    "Stytch Auth": 2, "Candid Health": 2,
     "Healthie": 2, "OpenLoop": 1, "Stripe": 2, "Shopify": 2,
     "DynamoDB": 3, "Supabase": 2, "Twilio": 2, "Customer.io": 1,
     "Slack": 1, "Datadog": 1, "Sentry": 1, "Inngest": 2,
@@ -129,7 +127,7 @@ MOCK_MONITOR_COUNTS = {
 
 # Services that will randomly show issues (makes the dashboard look realistic)
 MOCK_FLAKY_SERVICES = [
-    ("Athena Health", "warn", "athena-api-latency"),
+
     ("Stripe", "alert", "stripe-webhook-failures"),
     ("Inngest", "warn", "inngest-function-failures"),
     ("API (CRO)", "warn", "cro-api-p99-latency"),

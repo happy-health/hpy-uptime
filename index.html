@@ -361,7 +361,7 @@ const REFRESH_INTERVAL = 60; // seconds
 const SERVICES = [
   // ── Cloud & Hosting ─────────────────────────────────────────────────
   sp("AWS", "Cloud & Hosting", "https://health.aws.amazon.com/health/status",
-     null, "https://health.aws.amazon.com/health/status", true, "atom"),
+     null, "https://status.aws.amazon.com/rss/all.rss", false, "atom"),
   sp("Google Cloud", "Cloud & Hosting", "https://status.cloud.google.com",
      null, "https://status.cloud.google.com/feed.atom", true, "atom"),
   sp("Microsoft Azure", "Cloud & Hosting", "https://azure.status.microsoft/en-us/status",
@@ -385,12 +385,6 @@ const SERVICES = [
      "https://status.joincandidhealth.com"),
   sp("Healthie", "Healthcare", "https://status.gethealthie.com",
      "https://status.gethealthie.com"),
-  {
-    name: "Athena Health", category: "Healthcare",
-    statusUrl: "https://status.athenahealth.com",
-    fetch: fetchManual(),
-  },
-
   // ── Payments ────────────────────────────────────────────────────────
   {
     name: "Stripe", category: "Payments",
@@ -400,12 +394,6 @@ const SERVICES = [
   },
   sp("Shopify", "Payments", "https://www.shopifystatus.com",
      "https://www.shopifystatus.com"),
-  {
-    name: "PayPal", category: "Payments",
-    statusUrl: "https://www.paypal-status.com",
-    fetch: fetchAtomFeed("https://www.paypal-status.com/feed/atom", true),
-    needsProxy: true,
-  },
 
   // ── Database ────────────────────────────────────────────────────────
   sp("Supabase", "Database", "https://status.supabase.com",
@@ -645,11 +633,7 @@ function fetchApple(apiUrl) {
   };
 }
 
-function fetchManual() {
-  return async function () {
-    return { level: "error", description: "Manual check required (WAF-blocked)" };
-  };
-}
+
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 

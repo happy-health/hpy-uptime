@@ -317,6 +317,9 @@
       text-align: center;
     }
 
+    .summary-card { cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+    .summary-card:hover { background: var(--surface-hover); }
+    .summary-card.active { border-color: var(--blue); background: rgba(88,166,255,0.06); }
     .summary-card .count { font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
     .summary-card .label { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
 
@@ -858,19 +861,19 @@
   <div class="mismatch-alerts" id="mismatch-alerts"></div>
 
   <div class="summary" id="summary-cards">
-    <div class="summary-card">
+    <div class="summary-card" onclick="setStatusFilter('operational')" data-filter="operational">
       <div class="count count-operational" id="count-up">&ndash;</div>
       <div class="label">Operational</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card" onclick="setStatusFilter('degraded')" data-filter="degraded">
       <div class="count count-degraded" id="count-degraded">&ndash;</div>
       <div class="label">Degraded</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card" onclick="setStatusFilter('outage')" data-filter="outage">
       <div class="count count-outage" id="count-outage">&ndash;</div>
       <div class="label">Outage</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card" onclick="setStatusFilter('mismatch')" data-filter="mismatch">
       <div class="count count-mismatch" id="count-mismatch">&ndash;</div>
       <div class="label">Mismatch</div>
     </div>
@@ -927,7 +930,6 @@ const STORAGE_KEY_INTERNAL = "hpy-uptime-internal-history";
 
 const GLOBAL_TO_INTERNAL = {
   "Stytch": "Stytch Auth",
-  "Athena Health": "Athena Health",
   "Candid Health": "Candid Health",
   "Healthie": "Healthie",
   "Stripe": "Stripe",
@@ -964,7 +966,7 @@ const TEAM_MAPPINGS = {
   "Clinicians": [
     "API Gateway",
     "Stytch Auth", "Stytch",
-    "Athena Health", "Candid Health", "Healthie", "OpenLoop",
+    "Candid Health", "Healthie", "OpenLoop",
     "DynamoDB", "Supabase",
     "Twilio",
     "AWS RDS", "Host Health",
@@ -983,7 +985,6 @@ const TEAM_MAPPINGS = {
     "Datadog", "Sentry",
     "Stytch Auth", "Stytch",
     "Stripe", "Shopify",
-    "Athena Health",
   ],
 };
 
@@ -1002,6 +1003,7 @@ let totalMonitors = 0;
 const expandedServices = new Set();
 let allExpanded = false;
 let currentTeamFilter = "All";
+let currentStatusFilter = null; // null = show all, or "operational" | "degraded" | "outage" | "mismatch"
 
 // ── Category display order ──────────────────────────────────────────────
 
@@ -1016,7 +1018,7 @@ const CATEGORY_ORDER = [
 
 const GLOBAL_SERVICES = [
   sp("AWS", "Cloud & Hosting", "https://health.aws.amazon.com/health/status",
-     null, "https://health.aws.amazon.com/health/status", true, "atom"),
+     null, "https://status.aws.amazon.com/rss/all.rss", false, "atom"),
   sp("Google Cloud", "Cloud & Hosting", "https://status.cloud.google.com",
      null, "https://status.cloud.google.com/feed.atom", true, "atom"),
   sp("Microsoft Azure", "Cloud & Hosting", "https://azure.status.microsoft/en-us/status",
@@ -1031,30 +1033,21 @@ const GLOBAL_SERVICES = [
     name: "Stytch", category: "Authentication",
     statusUrl: "https://status.stytch.com",
     fetch: fetchInstatus("https://stytch.instatus.com/summary.json"),
+    historyFetch: fetchAtomHistory("https://status.stytch.com/history.atom", false),
   },
   sp("Candid Health", "Healthcare", "https://status.joincandidhealth.com",
      "https://status.joincandidhealth.com"),
   sp("Healthie", "Healthcare", "https://status.gethealthie.com",
      "https://status.gethealthie.com"),
   {
-    name: "Athena Health", category: "Healthcare",
-    statusUrl: "https://status.athenahealth.com",
-    fetch: fetchManual(),
-  },
-  {
     name: "Stripe", category: "Payments",
     statusUrl: "https://status.stripe.com",
     fetch: fetchStripe("https://status.stripe.com/current"),
+    historyFetch: fetchStripeHistory("https://status.stripe.com/current/full"),
     needsProxy: true,
   },
   sp("Shopify", "Payments", "https://www.shopifystatus.com",
      "https://www.shopifystatus.com"),
-  {
-    name: "PayPal", category: "Payments",
-    statusUrl: "https://www.paypal-status.com",
-    fetch: fetchAtomFeed("https://www.paypal-status.com/feed/atom", true),
-    needsProxy: true,
-  },
   sp("Supabase", "Database", "https://status.supabase.com",
      "https://status.supabase.com"),
   sp("Sanity", "CMS", "https://www.sanity-status.com",
@@ -1065,6 +1058,7 @@ const GLOBAL_SERVICES = [
     name: "Slack", category: "Communications",
     statusUrl: "https://slack-status.com",
     fetch: fetchSlack("https://slack-status.com/api/v2.0.0/current"),
+    historyFetch: fetchSlackHistory("https://slack-status.com/api/v2.0.0/history"),
   },
   sp("Customer.io", "Communications", "https://status.customerio.com",
      "https://status.customerio.com"),
@@ -1086,6 +1080,7 @@ const GLOBAL_SERVICES = [
     name: "GitLab", category: "Source Control",
     statusUrl: "https://status.gitlab.com",
     fetch: fetchAtomFeed("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/rss", false),
+    historyFetch: fetchStatusIoHistory("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/status_chart/component/5b36e05f02d06804c0834a09/uptime"),
   },
   sp("npm Registry", "Package Registries", "https://status.npmjs.org",
      "https://status.npmjs.org"),
@@ -1101,6 +1096,7 @@ const GLOBAL_SERVICES = [
     name: "Eve", category: "Partner",
     statusUrl: "https://status.eve.co",
     fetch: fetchUptimeRobot("https://status.eve.co/api/getMonitorList/BQLq3SDoBo"),
+    historyFetch: fetchUptimeRobotHistory("https://status.eve.co/api/getMonitorList/BQLq3SDoBo"),
   },
 ];
 
@@ -1241,9 +1237,183 @@ function fetchApple(apiUrl) {
   };
 }
 
-function fetchManual() {
-  return async function () {
-    return { level: "error", description: "Manual check required (WAF-blocked)" };
+
+
+// ── History fetcher factories ─────────────────────────────────────────────
+// These return a function that populates globalHistory[name] with 90 days of data.
+
+function fetchStripeHistory(apiUrl) {
+  // status.stripe.com/current/full returns 90 days of daily uptime data per sub-service
+  return async function (name) {
+    const url = proxyWrap(apiUrl, true);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    if (!globalHistory[name]) globalHistory[name] = {};
+    const days = getLast90Days();
+    // Aggregate worst status across all Stripe sub-services per day
+    const dayStatus = {};
+    for (const svc of data.uptimeData || []) {
+      for (const entry of svc.uptime || []) {
+        const d = new Date(entry.date);
+        const dayKey = getDayKey(d);
+        let level = "operational";
+        if (entry.downtime > 0) level = "major";
+        else if (entry.degraded > 0) level = "degraded";
+        else if (entry.delayed > 0) level = "degraded";
+        const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+        const existing = dayStatus[dayKey];
+        if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+          dayStatus[dayKey] = level;
+        }
+      }
+    }
+    for (const day of days) {
+      const level = dayStatus[day] || "operational";
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+      const existing = globalHistory[name][day];
+      if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+        globalHistory[name][day] = level;
+      }
+    }
+  };
+}
+
+function fetchSlackHistory(apiUrl) {
+  // slack-status.com/api/v2.0.0/history returns all past incidents
+  return async function (name) {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const incidents = await resp.json();
+    if (!globalHistory[name]) globalHistory[name] = {};
+    const days = getLast90Days();
+    const ninetyDaysAgo = Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000;
+    for (const inc of incidents) {
+      const created = new Date(inc.date_created);
+      if (created.getTime() < ninetyDaysAgo) continue;
+      const dayKey = getDayKey(created);
+      const level = inc.type === "outage" ? "major" : "degraded";
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+      const existing = globalHistory[name][dayKey];
+      if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+        globalHistory[name][dayKey] = level;
+      }
+    }
+    for (const day of days) {
+      if (!globalHistory[name][day]) {
+        globalHistory[name][day] = "operational";
+      }
+    }
+  };
+}
+
+function fetchUptimeRobotHistory(apiUrl) {
+  // UptimeRobot getMonitorList already returns dailyRatios with 90 days of data
+  return async function (name) {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    if (!globalHistory[name]) globalHistory[name] = {};
+    const monitors = data.psp?.monitors || [];
+    const days = getLast90Days();
+    // Aggregate worst across all monitors per day
+    const dayStatus = {};
+    for (const mon of monitors) {
+      for (const entry of mon.dailyRatios || []) {
+        const dayKey = entry.date;
+        let level = "operational";
+        const ratio = parseFloat(entry.ratio);
+        if (ratio < 95) level = "major";
+        else if (ratio < 99.5) level = "degraded";
+        const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+        const existing = dayStatus[dayKey];
+        if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+          dayStatus[dayKey] = level;
+        }
+      }
+    }
+    for (const day of days) {
+      const level = dayStatus[day] || "operational";
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+      const existing = globalHistory[name][day];
+      if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+        globalHistory[name][day] = level;
+      }
+    }
+  };
+}
+
+function fetchStatusIoHistory(uptimeUrl) {
+  // Status.io status_chart uptime endpoint returns 91 days of daily status
+  return async function (name) {
+    let resp = await fetch(uptimeUrl, { cache: "no-store" }).catch(() => null);
+    // Fallback to proxy if CORS blocks direct fetch
+    if (!resp || !resp.ok) {
+      const proxied = proxyWrap(uptimeUrl, true);
+      if (proxied !== uptimeUrl) resp = await fetch(proxied, { cache: "no-store" });
+    }
+    if (!resp || !resp.ok) throw new Error("HTTP " + (resp?.status || "fetch failed"));
+    const data = await resp.json();
+    if (!globalHistory[name]) globalHistory[name] = {};
+    const allDays = getLast90Days();
+    for (const entry of data.days || []) {
+      // entry.date is like "21 Nov 2025"
+      const d = new Date(entry.date + " 12:00:00");
+      if (isNaN(d.getTime())) continue;
+      const dayKey = getDayKey(d);
+      let level = "operational";
+      if (entry.status >= 500) level = "major";
+      else if (entry.status >= 300) level = "degraded";
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+      const existing = globalHistory[name][dayKey];
+      if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+        globalHistory[name][dayKey] = level;
+      }
+    }
+    for (const day of allDays) {
+      if (!globalHistory[name][day]) {
+        globalHistory[name][day] = "operational";
+      }
+    }
+  };
+}
+
+function fetchAtomHistory(feedUrl, needsProxy) {
+  // Parse an Atom/RSS feed and backfill 90 days of history from incident entries
+  return async function (name) {
+    const url = proxyWrap(feedUrl, needsProxy);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const text = await resp.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, "application/xml");
+    if (xml.querySelector("parsererror")) throw new Error("XML parse error");
+
+    if (!globalHistory[name]) globalHistory[name] = {};
+    const days = getLast90Days();
+    const ninetyDaysAgo = Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000;
+    const entries = xml.querySelectorAll("entry, item");
+    for (const entry of entries) {
+      const published = entry.querySelector("published, pubDate, updated");
+      if (!published) continue;
+      const date = new Date(published.textContent.trim());
+      if (isNaN(date.getTime()) || date.getTime() < ninetyDaysAgo) continue;
+      const dayKey = getDayKey(date);
+      const title = entry.querySelector("title")?.textContent?.trim() || "";
+      const level = classifyIncidentTitle(title);
+      if (level === "operational") continue; // resolved incidents don't count
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+      const existing = globalHistory[name][dayKey];
+      if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+        globalHistory[name][dayKey] = level;
+      }
+    }
+    // Fill remaining days as operational
+    for (const day of days) {
+      if (!globalHistory[name][day]) {
+        globalHistory[name][day] = "operational";
+      }
+    }
   };
 }
 
@@ -1637,39 +1807,53 @@ async function refreshAll() {
 }
 
 async function populateIncidentHistory() {
-  const statuspageServices = GLOBAL_SERVICES.filter(s => s.incidentsUrl);
-  if (statuspageServices.length === 0) return;
-
   const days = getLast90Days();
   const ninetyDaysAgo = Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000;
 
-  const promises = statuspageServices.map(async (svc) => {
-    try {
-      const resp = await fetch(svc.incidentsUrl, { cache: "no-store" });
-      if (!resp.ok) return;
-      const data = await resp.json();
-      if (!globalHistory[svc.name]) globalHistory[svc.name] = {};
-      for (const inc of data.incidents || []) {
-        const dateStr = inc.created_at?.split("T")[0];
-        if (!dateStr) continue;
-        if (new Date(dateStr + "T00:00:00").getTime() < ninetyDaysAgo) continue;
-        const impactMap = { none: null, minor: "degraded", major: "partial", critical: "major" };
-        const level = impactMap[inc.impact];
-        if (!level) continue;
-        const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
-        const existing = globalHistory[svc.name][dateStr];
-        if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
-          globalHistory[svc.name][dateStr] = level;
-        }
-      }
-      for (const day of days) {
-        if (!globalHistory[svc.name][day]) {
-          globalHistory[svc.name][day] = "operational";
-        }
-      }
-    } catch { /* ignore */ }
-  });
+  const promises = [];
 
+  // Statuspage.io services (have incidentsUrl)
+  for (const svc of GLOBAL_SERVICES.filter(s => s.incidentsUrl)) {
+    promises.push((async () => {
+      try {
+        const resp = await fetch(svc.incidentsUrl, { cache: "no-store" });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (!globalHistory[svc.name]) globalHistory[svc.name] = {};
+        for (const inc of data.incidents || []) {
+          const dateStr = inc.created_at?.split("T")[0];
+          if (!dateStr) continue;
+          if (new Date(dateStr + "T00:00:00").getTime() < ninetyDaysAgo) continue;
+          const impactMap = { none: null, minor: "degraded", major: "partial", critical: "major" };
+          const level = impactMap[inc.impact];
+          if (!level) continue;
+          const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+          const existing = globalHistory[svc.name][dateStr];
+          if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+            globalHistory[svc.name][dateStr] = level;
+          }
+        }
+        for (const day of days) {
+          if (!globalHistory[svc.name][day]) {
+            globalHistory[svc.name][day] = "operational";
+          }
+        }
+      } catch { /* ignore */ }
+    })());
+  }
+
+  // Custom history fetchers (Stripe, Slack, Eve, GitLab, etc.)
+  for (const svc of GLOBAL_SERVICES.filter(s => s.historyFetch)) {
+    promises.push((async () => {
+      try {
+        await svc.historyFetch(svc.name);
+      } catch (e) {
+        console.warn("History fetch failed for " + svc.name + ":", e.message);
+      }
+    })());
+  }
+
+  if (promises.length === 0) return;
   await Promise.allSettled(promises);
   saveStorage(STORAGE_KEY_GLOBAL, globalHistory);
   render();
@@ -1817,7 +2001,28 @@ function renderFilterBar() {
 
 function setTeamFilter(team) {
   currentTeamFilter = team;
+  currentStatusFilter = null; // reset status filter when switching teams
   render();
+}
+
+function setStatusFilter(filter) {
+  // Toggle: clicking the active filter clears it
+  currentStatusFilter = currentStatusFilter === filter ? null : filter;
+  render();
+}
+
+function serviceMatchesStatusFilter(svc, filter) {
+  // A service can match multiple filters (e.g. degraded AND mismatch)
+  const levels = [];
+  if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
+  if (svc.internal && svc.internal.level !== "unknown") levels.push(svc.internal.level);
+  const worst = getWorstLevel(levels);
+
+  if (filter === "mismatch") return !!getMismatchType(svc);
+  if (filter === "outage") return worst === "major";
+  if (filter === "degraded") return worst === "degraded" || worst === "partial";
+  if (filter === "operational") return worst === "operational";
+  return true;
 }
 
 function renderTeamSummary(filtered) {
@@ -1858,14 +2063,25 @@ function render() {
   container.innerHTML = "";
 
   const unified = buildUnifiedServiceList();
-  const filtered = unified.filter(s => isServiceInTeam(s, currentTeamFilter));
+  let filtered = unified.filter(s => isServiceInTeam(s, currentTeamFilter));
 
   renderFilterBar();
   renderTeamSummary(filtered);
 
   // Show/hide summary cards based on filter
   const summaryEl = document.getElementById("summary-cards");
-  if (summaryEl) summaryEl.style.display = currentTeamFilter === "All" ? "flex" : "none";
+  if (summaryEl) {
+    summaryEl.style.display = currentTeamFilter === "All" ? "flex" : "none";
+    // Highlight active status filter card
+    summaryEl.querySelectorAll(".summary-card").forEach(card => {
+      card.classList.toggle("active", card.dataset.filter === currentStatusFilter);
+    });
+  }
+
+  // Apply status filter
+  if (currentStatusFilter) {
+    filtered = filtered.filter(s => serviceMatchesStatusFilter(s, currentStatusFilter));
+  }
 
   // Group by category
   const groups = {};
@@ -2114,21 +2330,11 @@ function renderMismatchAlerts() {
 }
 
 function updateSummary(unified) {
-  let up = 0, degraded = 0, outage = 0, mismatchCount = 0;
-
-  for (const svc of unified) {
-    // Use worst of global + internal
-    const levels = [];
-    if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
-    if (svc.internal) levels.push(svc.internal.level);
-
-    const worst = getWorstLevel(levels);
-    if (worst === "operational") up++;
-    else if (worst === "degraded" || worst === "partial") degraded++;
-    else if (worst === "major") outage++;
-
-    if (getMismatchType(svc)) mismatchCount++;
-  }
+  // Count using the same logic as the filter so numbers match rows when clicked
+  const up = unified.filter(s => serviceMatchesStatusFilter(s, "operational")).length;
+  const degraded = unified.filter(s => serviceMatchesStatusFilter(s, "degraded")).length;
+  const outage = unified.filter(s => serviceMatchesStatusFilter(s, "outage")).length;
+  const mismatchCount = unified.filter(s => serviceMatchesStatusFilter(s, "mismatch")).length;
 
   document.getElementById("count-up").textContent = up;
   document.getElementById("count-degraded").textContent = degraded;

@@ -10,7 +10,7 @@ MOCK_RESPONSE = {
         {"name": "API (Enso)", "category": "Core Platform", "level": "operational", "description": "All 3 monitors OK", "monitor_count": 3, "alert_count": 0, "warn_count": 0},
         {"name": "API (CRO)", "category": "Core Platform", "level": "operational", "description": "All 2 monitors OK", "monitor_count": 2, "alert_count": 0, "warn_count": 0},
         {"name": "Stytch Auth", "category": "Authentication", "level": "operational", "description": "All 2 monitors OK", "monitor_count": 2, "alert_count": 0, "warn_count": 0},
-        {"name": "Athena Health", "category": "Healthcare", "level": "degraded", "description": "1/3 warning: athena-api-latency", "monitor_count": 3, "alert_count": 0, "warn_count": 1},
+
         {"name": "Candid Health", "category": "Healthcare", "level": "operational", "description": "All 2 monitors OK", "monitor_count": 2, "alert_count": 0, "warn_count": 0},
         {"name": "Healthie", "category": "Healthcare", "level": "operational", "description": "All 2 monitors OK", "monitor_count": 2, "alert_count": 0, "warn_count": 0},
         {"name": "OpenLoop", "category": "Healthcare", "level": "operational", "description": "All 1 monitors OK", "monitor_count": 1, "alert_count": 0, "warn_count": 0},
