@@ -1021,14 +1021,6 @@
       <div class="count count-outage" id="count-outage">&ndash;</div>
       <div class="label">Outage</div>
     </div>
-    <div class="summary-card" onclick="setStatusFilter('mismatch')" data-filter="mismatch">
-      <div class="count count-mismatch" id="count-mismatch">&ndash;</div>
-      <div class="label">Mismatch</div>
-    </div>
-    <div class="summary-card" onclick="setStatusFilter('not_monitored')" data-filter="not_monitored">
-      <div class="count count-unknown" id="count-not-monitored">&ndash;</div>
-      <div class="label">Not Monitored</div>
-    </div>
   </div>
 
   <div class="legend">
@@ -2337,18 +2329,18 @@ function isServiceUnmonitored(svc) {
   return svc.internal && svc.internal.level === "unknown";
 }
 
-function serviceMatchesStatusFilter(svc, filter) {
-  // A service can match multiple filters (e.g. degraded AND mismatch)
+function getServiceWorstKnownLevel(svc) {
   const levels = [];
   if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
   if (svc.internal && svc.internal.level !== "unknown") levels.push(svc.internal.level);
-  const worst = getWorstLevel(levels);
+  return getWorstLevel(levels);
+}
 
-  if (filter === "not_monitored") return isServiceUnmonitored(svc);
-  if (filter === "mismatch") return !!getMismatchType(svc);
+function serviceMatchesStatusFilter(svc, filter) {
+  const worst = getServiceWorstKnownLevel(svc);
   if (filter === "outage") return worst === "major";
   if (filter === "degraded") return worst === "degraded" || worst === "partial";
-  if (filter === "operational") return worst === "operational" && !isServiceUnmonitored(svc);
+  if (filter === "operational") return worst === "operational" || worst === "unknown";
   return true;
 }
 
@@ -2409,7 +2401,7 @@ function render() {
   const indicatorEl = document.getElementById("filter-indicator");
   if (indicatorEl) {
     if (currentStatusFilter) {
-      const labels = { operational: "Operational", degraded: "Degraded", outage: "Outage", mismatch: "Mismatch", not_monitored: "Not Monitored" };
+      const labels = { operational: "Operational", degraded: "Degraded", outage: "Outage" };
       indicatorEl.style.display = "flex";
       indicatorEl.innerHTML =
         'Showing: <span class="filter-label">' + (labels[currentStatusFilter] || currentStatusFilter) +
@@ -2773,18 +2765,16 @@ function renderMismatchAlerts() {
 }
 
 function updateSummary(unified) {
-  // Count using the same logic as the filter so numbers match rows when clicked
-  const up = unified.filter(s => serviceMatchesStatusFilter(s, "operational")).length;
-  const degraded = unified.filter(s => serviceMatchesStatusFilter(s, "degraded")).length;
-  const outage = unified.filter(s => serviceMatchesStatusFilter(s, "outage")).length;
-  const mismatchCount = unified.filter(s => serviceMatchesStatusFilter(s, "mismatch")).length;
-  const notMonitored = unified.filter(s => serviceMatchesStatusFilter(s, "not_monitored")).length;
+  // Mutually exclusive counts: each service counted once (outage > degraded > operational)
+  let up = 0, degraded = 0, outage = 0;
+  for (const svc of unified) {
+    const worst = getServiceWorstKnownLevel(svc);
+    if (worst === "major") outage++;
+    else if (worst === "degraded" || worst === "partial") degraded++;
+    else up++;
+  }
 
-  const els = {
-    "count-up": up, "count-degraded": degraded,
-    "count-outage": outage, "count-mismatch": mismatchCount,
-    "count-not-monitored": notMonitored,
-  };
+  const els = { "count-up": up, "count-degraded": degraded, "count-outage": outage };
   for (const [id, val] of Object.entries(els)) {
     const el = document.getElementById(id);
     if (el) el.textContent = val;
