@@ -28,55 +28,93 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 2rem 1.5rem;
+      padding: 0;
     }
 
-    .container { max-width: 1060px; margin: 0 auto; }
+    .container { max-width: 1060px; margin: 0 auto; padding: 1.5rem; }
 
-    /* ── Header ──────────────────────────────────────────── */
+    /* ── Top banner bar (matches dashboard.happy-health.net) ── */
 
-    .header {
+    .top-bar {
+      background: #1e293b;
+      padding: 0.75rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      gap: 0.75rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
 
-    .header h1 { font-size: 1.4rem; font-weight: 600; }
-
-    .header-right {
+    .top-bar-left {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      color: var(--text-muted);
-      font-size: 0.82rem;
     }
 
-    .header-right button {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 0.3rem 0.75rem;
-      border-radius: 6px;
+    .top-bar h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin: 0;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+    }
+
+    .pill-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #cbd5e1;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
       cursor: pointer;
       font-size: 0.8rem;
-      transition: color 0.15s, border-color 0.15s;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
-    .header-right button:hover { color: var(--text); border-color: var(--text-muted); }
+    .pill-btn:hover { background: rgba(255,255,255,0.15); color: #f1f5f9; }
+
+    .pill-btn-primary {
+      background: rgba(99,102,241,0.25);
+      border-color: rgba(99,102,241,0.3);
+      color: #a5b4fc;
+    }
+
+    .pill-btn-primary:hover {
+      background: rgba(99,102,241,0.35);
+      color: #c7d2fe;
+    }
+
+    .top-bar .countdown {
+      color: #64748b;
+      font-size: 0.75rem;
+    }
+
+    .top-bar .user-email {
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
 
     .badge-internal {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      background: rgba(88,166,255,0.15);
-      color: var(--blue);
+      background: rgba(99,102,241,0.2);
+      color: #a5b4fc;
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
-      margin-left: 0.5rem;
     }
 
     /* ── Login gate ──────────────────────────────────────── */
@@ -105,6 +143,84 @@
       padding: 1.5rem;
       min-height: 200px;
     }
+
+    .api-key-form {
+      margin-top: 1.5rem;
+      text-align: left;
+    }
+
+    .api-key-form label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .api-key-form .input-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .api-key-form input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.55rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .api-key-form input:focus { border-color: var(--blue); }
+
+    .api-key-form input::placeholder { color: #484f58; }
+
+    .api-key-form .unlock-btn {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #cbd5e1;
+      padding: 0.55rem 1.25rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .api-key-form .unlock-btn:hover { background: #334155; }
+
+    .api-key-form .url-input {
+      margin-bottom: 0.5rem;
+    }
+
+    .api-key-form .url-input input {
+      width: 100%;
+    }
+
+    .api-key-divider {
+      margin: 1.5rem 0;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #484f58;
+      position: relative;
+    }
+
+    .api-key-divider::before,
+    .api-key-divider::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .api-key-divider::before { left: 0; }
+    .api-key-divider::after { right: 0; }
 
     /* ── Overall banner ──────────────────────────────────── */
 
@@ -201,6 +317,9 @@
       text-align: center;
     }
 
+    .summary-card { cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+    .summary-card:hover { background: var(--surface-hover); }
+    .summary-card.active { border-color: var(--blue); background: rgba(88,166,255,0.06); }
     .summary-card .count { font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
     .summary-card .label { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
 
@@ -308,6 +427,9 @@
     .badge-loading .badge-dot { background: var(--text-muted); animation: pulse 1.5s infinite; }
     .badge-error { color: var(--text-muted); background: rgba(139,148,158,0.1); }
     .badge-error .badge-dot { background: var(--border); }
+
+    .badge-unmonitored { color: var(--text-muted); background: rgba(139,148,158,0.08); font-style: italic; }
+    .badge-unmonitored .badge-dot { background: var(--text-muted); opacity: 0.5; }
 
     /* ── Dual uptime bars ─────────────────────────────────── */
 
@@ -428,6 +550,223 @@
       border-radius: 2px;
     }
 
+    /* ── Environment toggle ─────────────────────────────── */
+
+    .env-toggle {
+      display: flex;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    .env-toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.45rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      font-family: inherit;
+    }
+
+    .env-toggle-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+
+    .env-toggle-btn.active {
+      background: rgba(99,102,241,0.25);
+      color: #a5b4fc;
+    }
+
+    .env-toggle-sm .env-toggle-btn {
+      padding: 0.3rem 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    .custom-url-link {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .custom-url-link:hover { color: var(--blue); }
+
+    .custom-url-row {
+      margin-bottom: 0.5rem;
+    }
+
+    .custom-url-row label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .custom-url-row input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.55rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .custom-url-row input:focus { border-color: var(--blue); }
+
+    /* ── Expand / collapse ──────────────────────────────── */
+
+    .service-row.expandable { cursor: pointer; }
+    .service-row.expandable:hover { background: rgba(255,255,255,0.03); }
+
+    .expand-icon {
+      display: inline-block;
+      font-size: 0.6rem;
+      margin-right: 0.4rem;
+      transition: transform 0.2s ease;
+      color: var(--text-muted);
+    }
+
+    .expand-icon.expanded { transform: rotate(90deg); }
+
+    .bar-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease, opacity 0.2s ease;
+      opacity: 0;
+    }
+
+    .bar-detail.open {
+      max-height: 200px;
+      opacity: 1;
+    }
+
+    /* ── Local dev / data source badges ────────────────── */
+
+    .badge-local-dev {
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(219,109,40,0.2);
+      color: #db6d28;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .badge-data-source {
+      font-size: 0.6rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      cursor: help;
+    }
+
+    .badge-mock {
+      background: rgba(210,153,34,0.2);
+      color: var(--yellow);
+    }
+
+    .badge-live {
+      background: rgba(63,185,80,0.15);
+      color: var(--green);
+    }
+
+    .internal-error-bar {
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.82rem;
+      background: rgba(248,81,73,0.08);
+      border: 1px solid rgba(248,81,73,0.25);
+      color: var(--red);
+      display: none;
+    }
+
+    /* ── Team filter bar ──────────────────────────────────── */
+
+    .team-filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .team-pill {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: inherit;
+    }
+
+    .team-pill:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+    .team-pill.active {
+      background: rgba(99,102,241,0.2);
+      border-color: rgba(99,102,241,0.35);
+      color: #c7d2fe;
+    }
+
+    .team-pill .team-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    .team-dot-operational { background: var(--green); }
+    .team-dot-degraded { background: var(--yellow); }
+    .team-dot-major { background: var(--red); }
+    .team-dot-unknown { background: var(--text-muted); opacity: 0.5; }
+
+    /* ── Team summary banner ─────────────────────────────── */
+
+    .team-summary-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .team-summary-banner .team-summary-label {
+      font-weight: 600;
+    }
+
+    .team-summary-banner .team-summary-detail {
+      color: var(--text-muted);
+    }
+
+    .team-summary-counts {
+      display: flex;
+      gap: 0.75rem;
+      margin-left: auto;
+      font-size: 0.78rem;
+    }
+
+    .team-summary-counts span { display: inline-flex; align-items: center; gap: 0.25rem; }
+
     /* ── Animations ──────────────────────────────────────── */
 
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -443,57 +782,98 @@
       .uptime-bar { gap: 1px; height: 16px; }
       .uptime-bar.single { height: 22px; }
       .status-badges { flex-wrap: wrap; }
+      .team-filter-bar { gap: 0.35rem; }
+      .team-pill { padding: 0.35rem 0.7rem; font-size: 0.72rem; }
+      .team-summary-banner { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+      .team-summary-counts { margin-left: 0; }
     }
   </style>
 </head>
 <body>
+
+<!-- ── Top bar (always visible, matches dashboard.happy-health.net) ── -->
+
+<div class="top-bar">
+  <div class="top-bar-left">
+    <h1>Happy Health &mdash; Status</h1>
+    <span class="badge-internal">Global + Internal</span>
+    <span class="badge-local-dev" id="local-dev-badge" style="display:none">Local Dev</span>
+    <span class="badge-data-source" id="data-source-badge" style="display:none"></span>
+    <div class="env-toggle env-toggle-sm" id="topbar-env-toggle" style="display:none">
+      <button class="env-toggle-btn active" data-env="prod" onclick="switchEnv('prod')">Prod</button>
+      <button class="env-toggle-btn" data-env="staging" onclick="switchEnv('staging')">Staging</button>
+    </div>
+  </div>
+  <div class="top-bar-right" id="top-bar-actions" style="display:none">
+    <span class="user-email" id="user-email"></span>
+    <span class="countdown" id="countdown">Refreshing in 60s</span>
+    <button class="pill-btn" id="expand-all-btn" onclick="toggleExpandAll()" style="display:none">Expand All</button>
+    <button class="pill-btn" onclick="refreshAll()">Reload</button>
+    <button class="pill-btn pill-btn-primary" onclick="logout()">Sign out</button>
+  </div>
+</div>
 
 <!-- ── Login gate (shown when not authenticated) ──────────── -->
 
 <div class="login-gate" id="login-gate">
   <h2>Internal Status Dashboard</h2>
   <p>Sign in with your Happy Health account to view global + internal system health side-by-side.</p>
+
+  <div class="api-key-form">
+    <label style="margin-bottom:0.5rem">Environment</label>
+    <div class="env-toggle" id="login-env-toggle">
+      <button class="env-toggle-btn active" data-env="prod" onclick="setLoginEnv('prod')">Production</button>
+      <button class="env-toggle-btn" data-env="staging" onclick="setLoginEnv('staging')">Staging</button>
+    </div>
+    <div class="custom-url-row" id="custom-url-row" style="display:none">
+      <label for="input-api-url">Custom API URL</label>
+      <input type="text" id="input-api-url" placeholder="https://your-api.example.com" />
+    </div>
+    <a href="#" class="custom-url-link" id="custom-url-link" onclick="toggleCustomUrl(event)">Use custom URL</a>
+    <label for="input-api-key" style="margin-top:0.75rem">API Key</label>
+    <div class="input-row">
+      <input type="password" id="input-api-key" placeholder="Enter API key to unlock" />
+      <button class="unlock-btn" onclick="unlockWithApiKey()">Unlock</button>
+    </div>
+  </div>
+
+  <div class="api-key-divider">or sign in with Stytch</div>
+
   <div id="stytch-login"></div>
 </div>
 
 <!-- ── Dashboard (shown after authentication) ─────────────── -->
 
-<div class="container" id="dashboard" style="display:none">
+<div id="dashboard" style="display:none">
+  <div class="container">
 
-  <div class="header">
-    <h1>
-      Happy Health &mdash; Status
-      <span class="badge-internal">Global + Internal</span>
-    </h1>
-    <div class="header-right">
-      <span id="user-email" style="font-size:0.75rem"></span>
-      <span id="countdown">Refreshing in 60s</span>
-      <button onclick="refreshAll()">Refresh now</button>
-      <button onclick="logout()">Sign out</button>
-    </div>
-  </div>
+  <div class="internal-error-bar" id="internal-error"></div>
 
   <div class="overall-banner banner-loading" id="overall-banner">
     <span class="banner-dot"></span>
     <span id="overall-text">Checking system status&hellip;</span>
   </div>
 
+  <div id="team-filter-bar" class="team-filter-bar"></div>
+
+  <div id="team-summary-banner" style="display:none"></div>
+
   <div class="mismatch-alerts" id="mismatch-alerts"></div>
 
-  <div class="summary">
-    <div class="summary-card">
+  <div class="summary" id="summary-cards">
+    <div class="summary-card" onclick="setStatusFilter('operational')" data-filter="operational">
       <div class="count count-operational" id="count-up">&ndash;</div>
       <div class="label">Operational</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card" onclick="setStatusFilter('degraded')" data-filter="degraded">
       <div class="count count-degraded" id="count-degraded">&ndash;</div>
       <div class="label">Degraded</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card" onclick="setStatusFilter('outage')" data-filter="outage">
       <div class="count count-outage" id="count-outage">&ndash;</div>
       <div class="label">Outage</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card" onclick="setStatusFilter('mismatch')" data-filter="mismatch">
       <div class="count count-mismatch" id="count-mismatch">&ndash;</div>
       <div class="label">Mismatch</div>
     </div>
@@ -520,16 +900,27 @@
     <span id="monitor-count"></span>
   </div>
 
+  </div><!-- /.container -->
 </div>
 
 <script>
 // ── Configuration ───────────────────────────────────────────────────────
 
+const ENVIRONMENTS = {
+  prod:    { url: "https://api.happy-health.net", label: "Production" },
+  staging: { url: "https://api.happy-staging.net", label: "Staging" },
+};
+
 const params = new URLSearchParams(location.search);
-const API_BASE_URL = params.get("api_url") || "";
+const IS_LOCAL = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+const LOCAL_LOGGED_OUT = sessionStorage.getItem("hpy-local-logged-out") === "1";
+let currentEnv = sessionStorage.getItem("hpy-env") || "prod";
+let API_BASE_URL = params.get("api_url") || sessionStorage.getItem("hpy-api-url-custom") || (IS_LOCAL ? "http://localhost:8787" : ENVIRONMENTS[currentEnv]?.url) || "";
+let API_KEY = sessionStorage.getItem("hpy-api-key-" + currentEnv) || params.get("api_key") || ((IS_LOCAL && !LOCAL_LOGGED_OUT) ? "test" : "") || "";
+let useCustomUrl = !!sessionStorage.getItem("hpy-api-url-custom") || !!params.get("api_url");
 const STYTCH_PUBLIC_TOKEN = params.get("stytch_token") || "";
-const API_KEY = params.get("api_key") || "";
-const PROXY_URL = params.get("proxy") || "";
+const PROXY_URL = params.get("proxy") || (IS_LOCAL ? "http://localhost:8787/proxy" : "");
+let isMockData = false;
 const REFRESH_INTERVAL = 60;
 const HISTORY_DAYS = 90;
 const STORAGE_KEY_GLOBAL = "hpy-uptime-history";
@@ -539,7 +930,6 @@ const STORAGE_KEY_INTERNAL = "hpy-uptime-internal-history";
 
 const GLOBAL_TO_INTERNAL = {
   "Stytch": "Stytch Auth",
-  "Athena Health": "Athena Health",
   "Candid Health": "Candid Health",
   "Healthie": "Healthie",
   "Stripe": "Stripe",
@@ -560,6 +950,46 @@ for (const [g, i] of Object.entries(GLOBAL_TO_INTERNAL)) {
   if (i) INTERNAL_TO_GLOBAL[i] = g;
 }
 
+// ── Team/audience mappings (includes global-only services) ───────────────
+
+const TEAM_MAPPINGS = {
+  "End Users": [
+    "API Gateway", "API (Enso)", "API (CRO)",
+    "Stytch Auth", "Stytch",
+    "Stripe", "Shopify",
+    "DynamoDB", "Supabase",
+    "Twilio",
+    "AWS Lambda", "AWS S3",
+    "Cloudflare", "Vercel",
+    "AWS RDS", "Host Health",
+  ],
+  "Clinicians": [
+    "API Gateway",
+    "Stytch Auth", "Stytch",
+    "Candid Health", "Healthie", "OpenLoop",
+    "DynamoDB", "Supabase",
+    "Twilio",
+    "AWS RDS", "Host Health",
+  ],
+  "Developers": [
+    "Datadog", "Sentry",
+    "Inngest",
+    "AWS Lambda", "AWS S3",
+    "AWS RDS", "Host Health", "Disk Health",
+    "GitHub", "Bitbucket", "GitLab",
+    "npm Registry", "PyPI",
+    "Cloudflare", "Vercel",
+  ],
+  "Customer Support": [
+    "Slack", "Customer.io", "Twilio",
+    "Datadog", "Sentry",
+    "Stytch Auth", "Stytch",
+    "Stripe", "Shopify",
+  ],
+};
+
+const TEAM_ORDER = ["All", "End Users", "Clinicians", "Developers", "Customer Support"];
+
 // ── State ───────────────────────────────────────────────────────────────
 
 const globalState = {};  // vendor name -> { level, description }
@@ -570,6 +1000,10 @@ let countdownSeconds = REFRESH_INTERVAL;
 let countdownTimer = null;
 let stytchClient = null;
 let totalMonitors = 0;
+const expandedServices = new Set();
+let allExpanded = false;
+let currentTeamFilter = "All";
+let currentStatusFilter = null; // null = show all, or "operational" | "degraded" | "outage" | "mismatch"
 
 // ── Category display order ──────────────────────────────────────────────
 
@@ -584,7 +1018,7 @@ const CATEGORY_ORDER = [
 
 const GLOBAL_SERVICES = [
   sp("AWS", "Cloud & Hosting", "https://health.aws.amazon.com/health/status",
-     null, "https://health.aws.amazon.com/health/status", true, "atom"),
+     null, "https://status.aws.amazon.com/rss/all.rss", false, "atom"),
   sp("Google Cloud", "Cloud & Hosting", "https://status.cloud.google.com",
      null, "https://status.cloud.google.com/feed.atom", true, "atom"),
   sp("Microsoft Azure", "Cloud & Hosting", "https://azure.status.microsoft/en-us/status",
@@ -599,30 +1033,21 @@ const GLOBAL_SERVICES = [
     name: "Stytch", category: "Authentication",
     statusUrl: "https://status.stytch.com",
     fetch: fetchInstatus("https://stytch.instatus.com/summary.json"),
+    historyFetch: fetchAtomHistory("https://status.stytch.com/history.atom", false),
   },
   sp("Candid Health", "Healthcare", "https://status.joincandidhealth.com",
      "https://status.joincandidhealth.com"),
   sp("Healthie", "Healthcare", "https://status.gethealthie.com",
      "https://status.gethealthie.com"),
   {
-    name: "Athena Health", category: "Healthcare",
-    statusUrl: "https://status.athenahealth.com",
-    fetch: fetchManual(),
-  },
-  {
     name: "Stripe", category: "Payments",
     statusUrl: "https://status.stripe.com",
     fetch: fetchStripe("https://status.stripe.com/current"),
+    historyFetch: fetchStripeHistory("https://status.stripe.com/current/full"),
     needsProxy: true,
   },
   sp("Shopify", "Payments", "https://www.shopifystatus.com",
      "https://www.shopifystatus.com"),
-  {
-    name: "PayPal", category: "Payments",
-    statusUrl: "https://www.paypal-status.com",
-    fetch: fetchAtomFeed("https://www.paypal-status.com/feed/atom", true),
-    needsProxy: true,
-  },
   sp("Supabase", "Database", "https://status.supabase.com",
      "https://status.supabase.com"),
   sp("Sanity", "CMS", "https://www.sanity-status.com",
@@ -633,6 +1058,7 @@ const GLOBAL_SERVICES = [
     name: "Slack", category: "Communications",
     statusUrl: "https://slack-status.com",
     fetch: fetchSlack("https://slack-status.com/api/v2.0.0/current"),
+    historyFetch: fetchSlackHistory("https://slack-status.com/api/v2.0.0/history"),
   },
   sp("Customer.io", "Communications", "https://status.customerio.com",
      "https://status.customerio.com"),
@@ -654,6 +1080,7 @@ const GLOBAL_SERVICES = [
     name: "GitLab", category: "Source Control",
     statusUrl: "https://status.gitlab.com",
     fetch: fetchAtomFeed("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/rss", false),
+    historyFetch: fetchStatusIoHistory("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/status_chart/component/5b36e05f02d06804c0834a09/uptime"),
   },
   sp("npm Registry", "Package Registries", "https://status.npmjs.org",
      "https://status.npmjs.org"),
@@ -669,6 +1096,7 @@ const GLOBAL_SERVICES = [
     name: "Eve", category: "Partner",
     statusUrl: "https://status.eve.co",
     fetch: fetchUptimeRobot("https://status.eve.co/api/getMonitorList/BQLq3SDoBo"),
+    historyFetch: fetchUptimeRobotHistory("https://status.eve.co/api/getMonitorList/BQLq3SDoBo"),
   },
 ];
 
@@ -809,9 +1237,183 @@ function fetchApple(apiUrl) {
   };
 }
 
-function fetchManual() {
-  return async function () {
-    return { level: "error", description: "Manual check required (WAF-blocked)" };
+
+
+// ── History fetcher factories ─────────────────────────────────────────────
+// These return a function that populates globalHistory[name] with 90 days of data.
+
+function fetchStripeHistory(apiUrl) {
+  // status.stripe.com/current/full returns 90 days of daily uptime data per sub-service
+  return async function (name) {
+    const url = proxyWrap(apiUrl, true);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    if (!globalHistory[name]) globalHistory[name] = {};
+    const days = getLast90Days();
+    // Aggregate worst status across all Stripe sub-services per day
+    const dayStatus = {};
+    for (const svc of data.uptimeData || []) {
+      for (const entry of svc.uptime || []) {
+        const d = new Date(entry.date);
+        const dayKey = getDayKey(d);
+        let level = "operational";
+        if (entry.downtime > 0) level = "major";
+        else if (entry.degraded > 0) level = "degraded";
+        else if (entry.delayed > 0) level = "degraded";
+        const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+        const existing = dayStatus[dayKey];
+        if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+          dayStatus[dayKey] = level;
+        }
+      }
+    }
+    for (const day of days) {
+      const level = dayStatus[day] || "operational";
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+      const existing = globalHistory[name][day];
+      if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+        globalHistory[name][day] = level;
+      }
+    }
+  };
+}
+
+function fetchSlackHistory(apiUrl) {
+  // slack-status.com/api/v2.0.0/history returns all past incidents
+  return async function (name) {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const incidents = await resp.json();
+    if (!globalHistory[name]) globalHistory[name] = {};
+    const days = getLast90Days();
+    const ninetyDaysAgo = Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000;
+    for (const inc of incidents) {
+      const created = new Date(inc.date_created);
+      if (created.getTime() < ninetyDaysAgo) continue;
+      const dayKey = getDayKey(created);
+      const level = inc.type === "outage" ? "major" : "degraded";
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+      const existing = globalHistory[name][dayKey];
+      if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+        globalHistory[name][dayKey] = level;
+      }
+    }
+    for (const day of days) {
+      if (!globalHistory[name][day]) {
+        globalHistory[name][day] = "operational";
+      }
+    }
+  };
+}
+
+function fetchUptimeRobotHistory(apiUrl) {
+  // UptimeRobot getMonitorList already returns dailyRatios with 90 days of data
+  return async function (name) {
+    const resp = await fetch(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    if (!globalHistory[name]) globalHistory[name] = {};
+    const monitors = data.psp?.monitors || [];
+    const days = getLast90Days();
+    // Aggregate worst across all monitors per day
+    const dayStatus = {};
+    for (const mon of monitors) {
+      for (const entry of mon.dailyRatios || []) {
+        const dayKey = entry.date;
+        let level = "operational";
+        const ratio = parseFloat(entry.ratio);
+        if (ratio < 95) level = "major";
+        else if (ratio < 99.5) level = "degraded";
+        const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+        const existing = dayStatus[dayKey];
+        if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+          dayStatus[dayKey] = level;
+        }
+      }
+    }
+    for (const day of days) {
+      const level = dayStatus[day] || "operational";
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+      const existing = globalHistory[name][day];
+      if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+        globalHistory[name][day] = level;
+      }
+    }
+  };
+}
+
+function fetchStatusIoHistory(uptimeUrl) {
+  // Status.io status_chart uptime endpoint returns 91 days of daily status
+  return async function (name) {
+    let resp = await fetch(uptimeUrl, { cache: "no-store" }).catch(() => null);
+    // Fallback to proxy if CORS blocks direct fetch
+    if (!resp || !resp.ok) {
+      const proxied = proxyWrap(uptimeUrl, true);
+      if (proxied !== uptimeUrl) resp = await fetch(proxied, { cache: "no-store" });
+    }
+    if (!resp || !resp.ok) throw new Error("HTTP " + (resp?.status || "fetch failed"));
+    const data = await resp.json();
+    if (!globalHistory[name]) globalHistory[name] = {};
+    const allDays = getLast90Days();
+    for (const entry of data.days || []) {
+      // entry.date is like "21 Nov 2025"
+      const d = new Date(entry.date + " 12:00:00");
+      if (isNaN(d.getTime())) continue;
+      const dayKey = getDayKey(d);
+      let level = "operational";
+      if (entry.status >= 500) level = "major";
+      else if (entry.status >= 300) level = "degraded";
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+      const existing = globalHistory[name][dayKey];
+      if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+        globalHistory[name][dayKey] = level;
+      }
+    }
+    for (const day of allDays) {
+      if (!globalHistory[name][day]) {
+        globalHistory[name][day] = "operational";
+      }
+    }
+  };
+}
+
+function fetchAtomHistory(feedUrl, needsProxy) {
+  // Parse an Atom/RSS feed and backfill 90 days of history from incident entries
+  return async function (name) {
+    const url = proxyWrap(feedUrl, needsProxy);
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const text = await resp.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, "application/xml");
+    if (xml.querySelector("parsererror")) throw new Error("XML parse error");
+
+    if (!globalHistory[name]) globalHistory[name] = {};
+    const days = getLast90Days();
+    const ninetyDaysAgo = Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000;
+    const entries = xml.querySelectorAll("entry, item");
+    for (const entry of entries) {
+      const published = entry.querySelector("published, pubDate, updated");
+      if (!published) continue;
+      const date = new Date(published.textContent.trim());
+      if (isNaN(date.getTime()) || date.getTime() < ninetyDaysAgo) continue;
+      const dayKey = getDayKey(date);
+      const title = entry.querySelector("title")?.textContent?.trim() || "";
+      const level = classifyIncidentTitle(title);
+      if (level === "operational") continue; // resolved incidents don't count
+      const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+      const existing = globalHistory[name][dayKey];
+      if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+        globalHistory[name][dayKey] = level;
+      }
+    }
+    // Fill remaining days as operational
+    for (const day of days) {
+      if (!globalHistory[name][day]) {
+        globalHistory[name][day] = "operational";
+      }
+    }
   };
 }
 
@@ -826,22 +1428,91 @@ function classifyIncidentTitle(title) {
 
 // ── Auth ────────────────────────────────────────────────────────────────
 
+function setLoginEnv(env) {
+  currentEnv = env;
+  document.querySelectorAll("#login-env-toggle .env-toggle-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.env === env);
+  });
+  // Restore saved key for this env
+  const saved = sessionStorage.getItem("hpy-api-key-" + env);
+  if (saved) document.getElementById("input-api-key").value = saved;
+  else document.getElementById("input-api-key").value = "";
+}
+
+function toggleCustomUrl(e) {
+  e.preventDefault();
+  const row = document.getElementById("custom-url-row");
+  const link = document.getElementById("custom-url-link");
+  const toggle = document.getElementById("login-env-toggle");
+  useCustomUrl = !useCustomUrl;
+  row.style.display = useCustomUrl ? "block" : "none";
+  toggle.style.display = useCustomUrl ? "none" : "flex";
+  link.textContent = useCustomUrl ? "Use environment presets" : "Use custom URL";
+}
+
+function unlockWithApiKey() {
+  const keyInput = document.getElementById("input-api-key").value.trim();
+  if (!keyInput) { document.getElementById("input-api-key").focus(); return; }
+
+  if (IS_LOCAL) {
+    // On localhost, always use local server
+    API_BASE_URL = "http://localhost:8787";
+    sessionStorage.removeItem("hpy-local-logged-out");
+  } else if (useCustomUrl) {
+    const urlInput = document.getElementById("input-api-url").value.trim();
+    if (!urlInput) { document.getElementById("input-api-url").focus(); return; }
+    API_BASE_URL = urlInput;
+    sessionStorage.setItem("hpy-api-url-custom", urlInput);
+  } else {
+    API_BASE_URL = ENVIRONMENTS[currentEnv].url;
+    sessionStorage.removeItem("hpy-api-url-custom");
+  }
+
+  API_KEY = keyInput;
+  sessionStorage.setItem("hpy-env", currentEnv);
+  sessionStorage.setItem("hpy-api-key-" + currentEnv, keyInput);
+  showDashboard();
+  refreshAll();
+}
+
+// Allow Enter key to submit
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && document.getElementById("login-gate").style.display !== "none") {
+    unlockWithApiKey();
+  }
+});
+
 async function initAuth() {
+  // Restore login form state from sessionStorage
+  if (currentEnv) setLoginEnv(currentEnv);
+  if (useCustomUrl) {
+    document.getElementById("custom-url-row").style.display = "block";
+    document.getElementById("login-env-toggle").style.display = "none";
+    document.getElementById("custom-url-link").textContent = "Use environment presets";
+    document.getElementById("input-api-url").value = API_BASE_URL;
+  }
+
   if (API_KEY) {
     showDashboard();
     refreshAll();
     return;
   }
 
+  // On localhost, simplify the login gate
+  if (IS_LOCAL) {
+    document.getElementById("input-api-key").value = "test";
+    document.getElementById("login-env-toggle").style.display = "none";
+    document.getElementById("custom-url-link").style.display = "none";
+    document.getElementById("stytch-login").innerHTML =
+      '<p style="color:var(--text-muted);font-size:0.78rem;padding:0.75rem;text-align:center">' +
+      'Running on <strong>localhost</strong> &mdash; click Unlock or press Enter to continue.</p>';
+    return;
+  }
+
   if (!STYTCH_PUBLIC_TOKEN) {
     document.getElementById("stytch-login").innerHTML =
-      '<p style="color:var(--text-muted);font-size:0.85rem;padding:1rem">' +
-      'Configure authentication by adding URL parameters:<br><br>' +
-      '<code style="background:rgba(255,255,255,0.06);padding:0.2rem 0.4rem;border-radius:4px;font-size:0.8rem">' +
-      '?api_url=https://your-api.com&amp;stytch_token=public-token-xxx</code><br><br>' +
-      'Or use API key auth:<br>' +
-      '<code style="background:rgba(255,255,255,0.06);padding:0.2rem 0.4rem;border-radius:4px;font-size:0.8rem">' +
-      '?api_url=https://your-api.com&amp;api_key=your-key</code></p>';
+      '<p style="color:var(--text-muted);font-size:0.78rem;padding:0.75rem;text-align:center">' +
+      'Stytch auth available when deployed with <code>stytch_token</code> parameter.</p>';
     return;
   }
 
@@ -882,6 +1553,18 @@ async function initAuth() {
 function showDashboard() {
   document.getElementById("login-gate").style.display = "none";
   document.getElementById("dashboard").style.display = "block";
+  document.getElementById("top-bar-actions").style.display = "flex";
+  if (IS_LOCAL) {
+    // On localhost: hide env toggle, show local indicator
+    document.getElementById("topbar-env-toggle").style.display = "none";
+    document.getElementById("local-dev-badge").style.display = "";
+  } else if (!useCustomUrl) {
+    const toggle = document.getElementById("topbar-env-toggle");
+    toggle.style.display = "flex";
+    toggle.querySelectorAll(".env-toggle-btn").forEach(b => {
+      b.classList.toggle("active", b.dataset.env === currentEnv);
+    });
+  }
   startCountdown();
 }
 
@@ -895,7 +1578,59 @@ function setUserEmail() {
 
 function logout() {
   if (stytchClient) stytchClient.session.revoke();
+  sessionStorage.removeItem("hpy-env");
+  sessionStorage.removeItem("hpy-api-url-custom");
+  for (const env of Object.keys(ENVIRONMENTS)) {
+    sessionStorage.removeItem("hpy-api-key-" + env);
+  }
+  if (IS_LOCAL) {
+    sessionStorage.setItem("hpy-local-logged-out", "1");
+  }
   location.reload();
+}
+
+function switchEnv(env) {
+  if (IS_LOCAL) return; // Env toggle disabled on localhost
+  if (env === currentEnv && !useCustomUrl) return;
+  currentEnv = env;
+  useCustomUrl = false;
+  sessionStorage.removeItem("hpy-api-url-custom");
+  sessionStorage.setItem("hpy-env", env);
+  API_BASE_URL = ENVIRONMENTS[env].url;
+  API_KEY = sessionStorage.getItem("hpy-api-key-" + env) || "";
+
+  document.querySelectorAll("#topbar-env-toggle .env-toggle-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.env === env);
+  });
+
+  if (!API_KEY) {
+    // No key saved for this env — show login gate
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("login-gate").style.display = "";
+    document.getElementById("top-bar-actions").style.display = "none";
+    document.getElementById("topbar-env-toggle").style.display = "none";
+    setLoginEnv(env);
+    return;
+  }
+
+  // Reset internal data for new env
+  internalServices = [];
+  internalHistory = loadStorage(STORAGE_KEY_INTERNAL);
+  refreshAll();
+}
+
+function toggleExpandAll() {
+  const unified = buildUnifiedServiceList();
+  const dualServices = unified.filter(s => s.global && s.internal);
+  if (allExpanded) {
+    expandedServices.clear();
+    allExpanded = false;
+  } else {
+    for (const svc of dualServices) expandedServices.add(svc.name);
+    allExpanded = true;
+  }
+  document.getElementById("expand-all-btn").textContent = allExpanded ? "Collapse All" : "Expand All";
+  render();
 }
 
 function getAuthHeaders() {
@@ -914,6 +1649,13 @@ function getAuthHeaders() {
 // ── Helpers ──────────────────────────────────────────────────────────────
 
 function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function buildDatadogUrl(tags) {
+  if (!tags || tags.length === 0) return null;
+  // Build a Datadog monitors manage URL filtered by the first tag
+  const query = tags.map(t => "tag:" + t).join(" ");
+  return "https://app.datadoghq.com/monitors/manage?q=" + encodeURIComponent(query);
+}
 
 function escapeHtml(s) {
   const d = document.createElement("div");
@@ -1016,20 +1758,27 @@ async function fetchInternalStatuses() {
     const data = await resp.json();
     internalServices = data.services || [];
     totalMonitors = data.total_monitors || 0;
+    isMockData = !!data.mock;
 
-    const today = getDayKey(new Date());
     for (const svc of internalServices) {
       recordInternalStatus(svc.name, svc.level);
     }
     saveStorage(STORAGE_KEY_INTERNAL, internalHistory);
+
+    // Show mock/live indicator
+    updateDataSourceBadge(data);
   } catch (e) {
     console.error("Internal status fetch failed:", e);
-    // Don't block rendering — global data still works
+    renderInternalError(e.message);
   }
 }
 
 async function refreshAll() {
   countdownSeconds = REFRESH_INTERVAL;
+
+  // Clear previous error state
+  const errEl = document.getElementById("internal-error");
+  if (errEl) errEl.style.display = "none";
 
   // Initialize loading state
   for (const svc of GLOBAL_SERVICES) {
@@ -1048,47 +1797,63 @@ async function refreshAll() {
 
   render();
 
-  document.getElementById("monitor-count").textContent =
-    totalMonitors ? totalMonitors + " Datadog monitors tracked" : "";
+  const monitorText = totalMonitors
+    ? totalMonitors + (isMockData ? " monitors (mock)" : " Datadog monitors tracked")
+    : "";
+  document.getElementById("monitor-count").textContent = monitorText;
 
   // Backfill global history
   populateIncidentHistory();
 }
 
 async function populateIncidentHistory() {
-  const statuspageServices = GLOBAL_SERVICES.filter(s => s.incidentsUrl);
-  if (statuspageServices.length === 0) return;
-
   const days = getLast90Days();
   const ninetyDaysAgo = Date.now() - HISTORY_DAYS * 24 * 60 * 60 * 1000;
 
-  const promises = statuspageServices.map(async (svc) => {
-    try {
-      const resp = await fetch(svc.incidentsUrl, { cache: "no-store" });
-      if (!resp.ok) return;
-      const data = await resp.json();
-      if (!globalHistory[svc.name]) globalHistory[svc.name] = {};
-      for (const inc of data.incidents || []) {
-        const dateStr = inc.created_at?.split("T")[0];
-        if (!dateStr) continue;
-        if (new Date(dateStr + "T00:00:00").getTime() < ninetyDaysAgo) continue;
-        const impactMap = { none: null, minor: "degraded", major: "partial", critical: "major" };
-        const level = impactMap[inc.impact];
-        if (!level) continue;
-        const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
-        const existing = globalHistory[svc.name][dateStr];
-        if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
-          globalHistory[svc.name][dateStr] = level;
-        }
-      }
-      for (const day of days) {
-        if (!globalHistory[svc.name][day]) {
-          globalHistory[svc.name][day] = "operational";
-        }
-      }
-    } catch { /* ignore */ }
-  });
+  const promises = [];
 
+  // Statuspage.io services (have incidentsUrl)
+  for (const svc of GLOBAL_SERVICES.filter(s => s.incidentsUrl)) {
+    promises.push((async () => {
+      try {
+        const resp = await fetch(svc.incidentsUrl, { cache: "no-store" });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (!globalHistory[svc.name]) globalHistory[svc.name] = {};
+        for (const inc of data.incidents || []) {
+          const dateStr = inc.created_at?.split("T")[0];
+          if (!dateStr) continue;
+          if (new Date(dateStr + "T00:00:00").getTime() < ninetyDaysAgo) continue;
+          const impactMap = { none: null, minor: "degraded", major: "partial", critical: "major" };
+          const level = impactMap[inc.impact];
+          if (!level) continue;
+          const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
+          const existing = globalHistory[svc.name][dateStr];
+          if (!existing || (SEVERITY[level] || 0) > (SEVERITY[existing] || 0)) {
+            globalHistory[svc.name][dateStr] = level;
+          }
+        }
+        for (const day of days) {
+          if (!globalHistory[svc.name][day]) {
+            globalHistory[svc.name][day] = "operational";
+          }
+        }
+      } catch { /* ignore */ }
+    })());
+  }
+
+  // Custom history fetchers (Stripe, Slack, Eve, GitLab, etc.)
+  for (const svc of GLOBAL_SERVICES.filter(s => s.historyFetch)) {
+    promises.push((async () => {
+      try {
+        await svc.historyFetch(svc.name);
+      } catch (e) {
+        console.warn("History fetch failed for " + svc.name + ":", e.message);
+      }
+    })());
+  }
+
+  if (promises.length === 0) return;
   await Promise.allSettled(promises);
   saveStorage(STORAGE_KEY_GLOBAL, globalHistory);
   render();
@@ -1167,6 +1932,7 @@ function buildUnifiedServiceList() {
       statusUrl: globalSvc?.statusUrl || null,
       global: gState && gState.level !== "loading" ? gState : null,
       internal: { level: intSvc.level, description: intSvc.description },
+      ddTags: intSvc.tags || [],
       globalHistoryKey: globalName,
       internalHistoryKey: intSvc.name,
     });
@@ -1194,15 +1960,132 @@ function buildUnifiedServiceList() {
   return list;
 }
 
+function isServiceInTeam(svc, team) {
+  if (team === "All") return true;
+  const teamServices = TEAM_MAPPINGS[team] || [];
+  // Check against service name and display name (covers global-only like "Stytch" vs "Stytch Auth")
+  return teamServices.includes(svc.name) || teamServices.includes(svc.displayName);
+}
+
+function getTeamWorstLevel(team) {
+  const unified = buildUnifiedServiceList();
+  const teamSvcs = unified.filter(s => isServiceInTeam(s, team));
+  const levels = [];
+  for (const svc of teamSvcs) {
+    if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
+    if (svc.internal && svc.internal.level !== "unknown") levels.push(svc.internal.level);
+  }
+  return getWorstLevel(levels);
+}
+
+function renderFilterBar() {
+  const bar = document.getElementById("team-filter-bar");
+  bar.innerHTML = "";
+  for (const team of TEAM_ORDER) {
+    const btn = document.createElement("button");
+    btn.className = "team-pill" + (currentTeamFilter === team ? " active" : "");
+    const dotLevel = team === "All" ? null : getTeamWorstLevel(team);
+    let dotHtml = "";
+    if (team !== "All" && dotLevel) {
+      const dotClass = dotLevel === "major" ? "team-dot-major"
+        : (dotLevel === "degraded" || dotLevel === "partial") ? "team-dot-degraded"
+        : dotLevel === "operational" ? "team-dot-operational"
+        : "team-dot-unknown";
+      dotHtml = '<span class="team-dot ' + dotClass + '"></span>';
+    }
+    btn.innerHTML = dotHtml + escapeHtml(team);
+    btn.addEventListener("click", () => setTeamFilter(team));
+    bar.appendChild(btn);
+  }
+}
+
+function setTeamFilter(team) {
+  currentTeamFilter = team;
+  currentStatusFilter = null; // reset status filter when switching teams
+  render();
+}
+
+function setStatusFilter(filter) {
+  // Toggle: clicking the active filter clears it
+  currentStatusFilter = currentStatusFilter === filter ? null : filter;
+  render();
+}
+
+function serviceMatchesStatusFilter(svc, filter) {
+  // A service can match multiple filters (e.g. degraded AND mismatch)
+  const levels = [];
+  if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
+  if (svc.internal && svc.internal.level !== "unknown") levels.push(svc.internal.level);
+  const worst = getWorstLevel(levels);
+
+  if (filter === "mismatch") return !!getMismatchType(svc);
+  if (filter === "outage") return worst === "major";
+  if (filter === "degraded") return worst === "degraded" || worst === "partial";
+  if (filter === "operational") return worst === "operational";
+  return true;
+}
+
+function renderTeamSummary(filtered) {
+  const banner = document.getElementById("team-summary-banner");
+  if (currentTeamFilter === "All") {
+    banner.style.display = "none";
+    return;
+  }
+
+  let op = 0, deg = 0, outage = 0, unmon = 0;
+  for (const svc of filtered) {
+    const levels = [];
+    if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
+    if (svc.internal && svc.internal.level !== "unknown") levels.push(svc.internal.level);
+    if (svc.internal && svc.internal.level === "unknown") unmon++;
+
+    const worst = getWorstLevel(levels);
+    if (worst === "operational") op++;
+    else if (worst === "degraded" || worst === "partial") deg++;
+    else if (worst === "major") outage++;
+  }
+
+  const parts = [];
+  if (op > 0) parts.push('<span style="color:var(--green)">' + op + ' operational</span>');
+  if (deg > 0) parts.push('<span style="color:var(--yellow)">' + deg + ' degraded</span>');
+  if (outage > 0) parts.push('<span style="color:var(--red)">' + outage + ' outage</span>');
+  if (unmon > 0) parts.push('<span style="color:var(--text-muted)">' + unmon + ' not monitored</span>');
+
+  banner.style.display = "flex";
+  banner.className = "team-summary-banner";
+  banner.innerHTML =
+    '<span class="team-summary-label">' + escapeHtml(currentTeamFilter) + '</span>' +
+    '<span class="team-summary-detail">' + filtered.length + ' services &mdash; ' + parts.join(', ') + '</span>';
+}
+
 function render() {
   const container = document.getElementById("services");
   container.innerHTML = "";
 
   const unified = buildUnifiedServiceList();
+  let filtered = unified.filter(s => isServiceInTeam(s, currentTeamFilter));
+
+  renderFilterBar();
+  renderTeamSummary(filtered);
+
+  // Show/hide summary cards based on filter
+  const summaryEl = document.getElementById("summary-cards");
+  if (summaryEl) {
+    summaryEl.style.display = currentTeamFilter === "All" ? "flex" : "none";
+    // Highlight active status filter card
+    summaryEl.querySelectorAll(".summary-card").forEach(card => {
+      card.classList.toggle("active", card.dataset.filter === currentStatusFilter);
+    });
+  }
+
+  // Apply status filter
+  if (currentStatusFilter) {
+    filtered = filtered.filter(s => serviceMatchesStatusFilter(s, currentStatusFilter));
+  }
 
   // Group by category
   const groups = {};
-  for (const svc of unified) {
+  for (const svc of filtered) {
     if (!groups[svc.category]) groups[svc.category] = [];
     groups[svc.category].push(svc);
   }
@@ -1229,24 +2112,38 @@ function render() {
   renderMismatchAlerts();
   updateSummary(unified);
   updateBanner(unified);
+
+  // Show/hide Expand All button
+  const dualCount = unified.filter(s => s.global && s.internal).length;
+  const expandBtn = document.getElementById("expand-all-btn");
+  if (expandBtn) {
+    expandBtn.style.display = dualCount > 0 ? "" : "none";
+    expandBtn.textContent = allExpanded ? "Collapse All" : "Expand All";
+  }
 }
 
 function renderServiceRow(svc) {
   const row = document.createElement("div");
   const hasBoth = svc.global && svc.internal;
   const mismatch = hasBoth ? getMismatchType(svc) : null;
-  row.className = "service-row" + (mismatch ? " has-mismatch" : "");
+  const isExpanded = expandedServices.has(svc.name);
+  row.className = "service-row" + (mismatch ? " has-mismatch" : "") + (hasBoth ? " expandable" : "");
 
   let html = '<div class="service-header">';
 
-  // Name
-  if (svc.statusUrl) {
-    html += '<span class="service-name"><a href="' + svc.statusUrl + '" target="_blank" rel="noopener">' + escapeHtml(svc.displayName) + '</a></span>';
-  } else {
-    html += '<span class="service-name">' + escapeHtml(svc.displayName) + '</span>';
+  // Name + chevron
+  html += '<span class="service-name">';
+  if (hasBoth) {
+    html += '<span class="expand-icon' + (isExpanded ? " expanded" : "") + '">&#x25B6;</span>';
   }
+  if (svc.statusUrl) {
+    html += '<a href="' + svc.statusUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + escapeHtml(svc.displayName) + '</a>';
+  } else {
+    html += escapeHtml(svc.displayName);
+  }
+  html += '</span>';
 
-  // Badges
+  // Badges — always show both Global + Ours badges
   html += '<span class="status-badges">';
   if (svc.global) {
     const gl = svc.global.level === "error" ? "unknown" : (svc.global.level || "loading");
@@ -1257,10 +2154,24 @@ function renderServiceRow(svc) {
   }
   if (svc.internal) {
     const il = svc.internal.level || "unknown";
-    html += '<span class="status-badge badge-' + il + '">';
-    html += '<span class="badge-label">Ours</span>';
-    html += '<span class="badge-dot"></span>' + capitalize(il);
-    html += '</span>';
+    const ddUrl = buildDatadogUrl(svc.ddTags || []);
+    const isAlerting = il === "major" || il === "degraded" || il === "partial";
+    if (il === "unknown") {
+      html += '<span class="status-badge badge-unmonitored">';
+      html += '<span class="badge-label">Ours</span>';
+      html += '<span class="badge-dot"></span>Not Monitored';
+      html += '</span>';
+    } else if (isAlerting && ddUrl) {
+      html += '<a href="' + ddUrl + '" target="_blank" rel="noopener" class="status-badge badge-' + il + '" style="text-decoration:none;cursor:pointer" onclick="event.stopPropagation()" title="View in Datadog">';
+      html += '<span class="badge-label">Ours</span>';
+      html += '<span class="badge-dot"></span>' + capitalize(il);
+      html += '</a>';
+    } else {
+      html += '<span class="status-badge badge-' + il + '">';
+      html += '<span class="badge-label">Ours</span>';
+      html += '<span class="badge-dot"></span>' + capitalize(il);
+      html += '</span>';
+    }
   }
   if (!svc.global && !svc.internal) {
     html += '<span class="status-badge badge-loading"><span class="badge-dot"></span>Loading</span>';
@@ -1268,14 +2179,18 @@ function renderServiceRow(svc) {
   html += '</span>';
   html += '</div>';
 
-  // Uptime bars
   const days = getLast90Days();
 
   if (hasBoth) {
-    // Dual bars
+    // Merged bar (always visible)
+    html += renderMergedBar(days, svc);
+
+    // Expanded dual bars
+    html += '<div class="bar-detail' + (isExpanded ? " open" : "") + '">';
     html += '<div class="bar-pair">';
     html += renderUptimeBar(days, svc.globalHistoryKey, globalHistory, "Global", "global-label", false);
     html += renderUptimeBar(days, svc.internalHistoryKey, internalHistory, "Ours", "ours-label", false);
+    html += '</div>';
     html += '</div>';
 
     // Mismatch indicator
@@ -1320,6 +2235,26 @@ function renderServiceRow(svc) {
   html += '</div>';
 
   row.innerHTML = html;
+
+  // Click handler for expand/collapse
+  if (hasBoth) {
+    row.addEventListener("click", (e) => {
+      // Don't toggle when clicking links or badges
+      if (e.target.closest("a")) return;
+      if (expandedServices.has(svc.name)) {
+        expandedServices.delete(svc.name);
+      } else {
+        expandedServices.add(svc.name);
+      }
+      // Update allExpanded state
+      const unified = buildUnifiedServiceList();
+      const dualCount = unified.filter(s => s.global && s.internal).length;
+      allExpanded = expandedServices.size >= dualCount;
+      document.getElementById("expand-all-btn").textContent = allExpanded ? "Collapse All" : "Expand All";
+      render();
+    });
+  }
+
   return row;
 }
 
@@ -1332,6 +2267,30 @@ function renderUptimeBar(days, historyKey, historyObj, label, labelClass, isSing
     const barClass = ds ? "bar-" + ds : "bar-unknown";
     const tipStatus = ds ? capitalize(ds) : "No data";
     html += '<div class="bar-segment ' + barClass + '" data-tip="' + label + ': ' + formatDate(day) + " \u2014 " + tipStatus + '"></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderMergedBar(days, svc) {
+  const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3, error: -1, unknown: -1, loading: -1 };
+  const LEVEL_BY_SEV = ["operational", "degraded", "partial", "major"];
+  const gHist = svc.globalHistoryKey ? globalHistory[svc.globalHistoryKey] || {} : {};
+  const iHist = svc.internalHistoryKey ? internalHistory[svc.internalHistoryKey] || {} : {};
+
+  let html = '<div class="bar-label" style="color:var(--text-muted)">Combined</div>';
+  html += '<div class="uptime-bar single">';
+  for (const day of days) {
+    const gDay = gHist[day] || "unknown";
+    const iDay = iHist[day] || "unknown";
+    const gSev = SEVERITY[gDay] ?? -1;
+    const iSev = SEVERITY[iDay] ?? -1;
+    const worstSev = Math.max(gSev, iSev);
+    const level = worstSev >= 0 ? LEVEL_BY_SEV[worstSev] : "unknown";
+    const barClass = "bar-" + level;
+    const tipG = gDay ? capitalize(gDay) : "No data";
+    const tipI = iDay ? capitalize(iDay) : "No data";
+    html += '<div class="bar-segment ' + barClass + '" data-tip="' + formatDate(day) + ' \u2014 Global: ' + tipG + ', Ours: ' + tipI + '"></div>';
   }
   html += '</div>';
   return html;
@@ -1371,21 +2330,11 @@ function renderMismatchAlerts() {
 }
 
 function updateSummary(unified) {
-  let up = 0, degraded = 0, outage = 0, mismatchCount = 0;
-
-  for (const svc of unified) {
-    // Use worst of global + internal
-    const levels = [];
-    if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
-    if (svc.internal) levels.push(svc.internal.level);
-
-    const worst = getWorstLevel(levels);
-    if (worst === "operational") up++;
-    else if (worst === "degraded" || worst === "partial") degraded++;
-    else if (worst === "major") outage++;
-
-    if (getMismatchType(svc)) mismatchCount++;
-  }
+  // Count using the same logic as the filter so numbers match rows when clicked
+  const up = unified.filter(s => serviceMatchesStatusFilter(s, "operational")).length;
+  const degraded = unified.filter(s => serviceMatchesStatusFilter(s, "degraded")).length;
+  const outage = unified.filter(s => serviceMatchesStatusFilter(s, "outage")).length;
+  const mismatchCount = unified.filter(s => serviceMatchesStatusFilter(s, "mismatch")).length;
 
   document.getElementById("count-up").textContent = up;
   document.getElementById("count-degraded").textContent = degraded;
@@ -1445,6 +2394,33 @@ function renderError(msg) {
   const text = document.getElementById("overall-text");
   banner.className = "overall-banner banner-outage";
   text.textContent = msg;
+}
+
+function renderInternalError(msg) {
+  const el = document.getElementById("internal-error");
+  if (!el) return;
+  el.style.display = "block";
+  el.innerHTML =
+    '<span style="margin-right:0.4rem">!</span>' +
+    'Internal status unavailable: ' + escapeHtml(msg) +
+    (IS_LOCAL ? ' &mdash; is local-server.py running?' : '');
+}
+
+function updateDataSourceBadge(data) {
+  const badge = document.getElementById("data-source-badge");
+  if (!badge) return;
+  badge.style.display = "";
+  if (data.mock) {
+    badge.className = "badge-data-source badge-mock";
+    badge.textContent = "Mock Data";
+    badge.title = data.datadog_error
+      ? "Datadog error: " + data.datadog_error + ". Showing mock data."
+      : "DD_API_KEY / DD_APP_KEY not configured. Showing mock data.";
+  } else {
+    badge.className = "badge-data-source badge-live";
+    badge.textContent = "Live";
+    badge.title = "Connected to Datadog API";
+  }
 }
 
 // ── Countdown ───────────────────────────────────────────────────────────
