@@ -356,6 +356,91 @@ const HISTORY_DAYS = 90;
 const STORAGE_KEY = "hpy-uptime-history";
 const REFRESH_INTERVAL = 60; // seconds
 
+// ── Component ID filters (must be defined before SERVICES) ──────────────
+
+// Twilio SMS (US) — only SMS/MMS components in North America
+const TWILIO_SMS_US_COMPONENT_IDS = [
+  "yvvy3vlp4djf", // SMS (Programmable Messaging)
+  "d1j2nx64rpq3", // MMS (Programmable Messaging)
+  "x3z86l06nvl7", // Programmable Messaging API
+  "7d8w22hqrh6s", // SMS Long Code, North America
+  "39mb8cmw8y2v", // SMS Short Code, North America
+  "32f2bm54nkvv", // SMS Toll-Free, North America
+  "8vdlvw3dsq8h", // MMS Long Code, North America
+  "tvjwfvczkf46", // MMS Toll-Free, North America
+];
+
+// Cloudflare — core platform services only (excludes 450+ global edge PoPs)
+const CLOUDFLARE_COMPONENT_IDS = [
+  "5wnz34mhfhrk", // CDN/Cache
+  "dp8ppfycqxcs", // Authoritative DNS
+  "g4tb35rs9yw7", // API
+  "3sq3s4d20ywk", // Dashboard
+  "fbvx0hxhhdj0", // CDN Cache Purge
+  "ts05t1p1j7r4", // DNS Firewall
+  "4l9qztbt6rbj", // DNS Root Servers
+  "w4k8yvhfb3vp", // Access
+];
+
+// Segment — US region only (excludes EU)
+const SEGMENT_US_COMPONENT_IDS = [
+  "g6z8h6bwf010", // Data Ingestion (Tracking) API (US)
+  "c13tbpl4dm8m", // Web Interface (US)
+  "klyl7cz2012x", // Analytics.js CDN (US)
+  "7wv8256rdp62", // Streaming Destinations (US)
+  "h32n3sb6hz33", // Cloud Sources (US)
+  "ylfsvnn8hcs1", // Warehouse Destinations (US)
+  "804tjyrkwnlw", // Libraries (US)
+  "g6ncbp86zxm7", // Engage (US)
+  "58j460c4vffk", // Data Processing Pipeline (US)
+  "4snztn8n32qk", // Public API (US)
+  "yk53kzcsw671", // Blobstore Destinations (US)
+  "w392yz67sbxp", // Data Lakes (US)
+  "1jxpx3ysdvj1", // Data Deletions (US)
+  "hxjkwnmnyh7r", // Linked Audiences (US)
+  "yk55rmb9rlym", // Reverse ETL (US)
+  "zqj3vffxvytv", // Linked Events (US)
+  "m0n5pwdch93f", // Journeys (US)
+];
+
+// Sentry — US ingestion + US alerting + global services (excludes EU)
+const SENTRY_US_COMPONENT_IDS = [
+  "khtl9dcky3lb", // Dashboard
+  "qywmfv7jr0pd", // API
+  "51yszynm4xyv", // US Error Ingestion
+  "bdg4djkxjxmk", // US Transaction Ingestion
+  "cycj4r32g25w", // US Attachment Ingestion
+  "52t4t3ww2qcn", // US Profile Ingestion
+  "zxkxxtspk64g", // US Replay Ingestion
+  "qd7tzrk5q8xm", // US Span Ingestion
+  "6f1r28lydc6h", // US Cron Monitoring
+  "7wrqyj84ltw7", // Custom Metrics (beta)
+  "bctv81yt9s6w", // US Errors Alerting
+  "mbhk48shsbl8", // US Transactions Alerting
+  "rcdlp8rvtf7t", // US Spans Alerting
+  "fvsfbxc1mb16", // US Uptime Monitoring
+];
+
+// Mixpanel — US region + global services (excludes EU/India)
+const MIXPANEL_US_COMPONENT_IDS = [
+  "45yb5qck0sw5", // Application Availability (US)
+  "cq5ttq9czyjh", // Ingestion API Availability (US)
+  "7cdmvbkr0dyq", // JavaScript Library CDN
+  "tjt23lh5r46g", // Data Export
+  "v1kc88rj0qmw", // Warehouse Connectors
+];
+
+// PyPI — core service only (excludes 80+ Fastly CDN edge nodes)
+const PYPI_COMPONENT_IDS = [
+  "06hwjcnhlz03", // pypi.org - General
+  "xt7f24hjvspn", // pypi.org - CDN
+  "yjlyv2k3zz3p", // pypi.org - Backends
+  "frjs3hvgp2bk", // files.pythonhosted.org - Files
+  "p2b1wmgvmwln", // files.pythonhosted.org - Redirects
+  "nj4jx0hljzvl", // files.pythonhosted.org - Redirects Backends
+  "5k8sx11bnccq", // pypi.org - Email
+];
+
 // ── Service definitions ─────────────────────────────────────────────────
 
 const SERVICES = [
@@ -574,89 +659,6 @@ function fetchStatuspageComponents(apiUrl, componentIds, okMessage) {
     };
   };
 }
-
-// Twilio SMS (US) — only SMS/MMS components in North America
-const TWILIO_SMS_US_COMPONENT_IDS = [
-  "yvvy3vlp4djf", // SMS (Programmable Messaging)
-  "d1j2nx64rpq3", // MMS (Programmable Messaging)
-  "x3z86l06nvl7", // Programmable Messaging API
-  "7d8w22hqrh6s", // SMS Long Code, North America
-  "39mb8cmw8y2v", // SMS Short Code, North America
-  "32f2bm54nkvv", // SMS Toll-Free, North America
-  "8vdlvw3dsq8h", // MMS Long Code, North America
-  "tvjwfvczkf46", // MMS Toll-Free, North America
-];
-
-// Cloudflare — core platform services only (excludes 450+ global edge PoPs)
-const CLOUDFLARE_COMPONENT_IDS = [
-  "5wnz34mhfhrk", // CDN/Cache
-  "dp8ppfycqxcs", // Authoritative DNS
-  "g4tb35rs9yw7", // API
-  "3sq3s4d20ywk", // Dashboard
-  "fbvx0hxhhdj0", // CDN Cache Purge
-  "ts05t1p1j7r4", // DNS Firewall
-  "4l9qztbt6rbj", // DNS Root Servers
-  "w4k8yvhfb3vp", // Access
-];
-
-// Segment — US region only (excludes EU)
-const SEGMENT_US_COMPONENT_IDS = [
-  "g6z8h6bwf010", // Data Ingestion (Tracking) API (US)
-  "c13tbpl4dm8m", // Web Interface (US)
-  "klyl7cz2012x", // Analytics.js CDN (US)
-  "7wv8256rdp62", // Streaming Destinations (US)
-  "h32n3sb6hz33", // Cloud Sources (US)
-  "ylfsvnn8hcs1", // Warehouse Destinations (US)
-  "804tjyrkwnlw", // Libraries (US)
-  "g6ncbp86zxm7", // Engage (US)
-  "58j460c4vffk", // Data Processing Pipeline (US)
-  "4snztn8n32qk", // Public API (US)
-  "yk53kzcsw671", // Blobstore Destinations (US)
-  "w392yz67sbxp", // Data Lakes (US)
-  "1jxpx3ysdvj1", // Data Deletions (US)
-  "hxjkwnmnyh7r", // Linked Audiences (US)
-  "yk55rmb9rlym", // Reverse ETL (US)
-  "zqj3vffxvytv", // Linked Events (US)
-  "m0n5pwdch93f", // Journeys (US)
-];
-
-// Sentry — US ingestion + US alerting + global services (excludes EU)
-const SENTRY_US_COMPONENT_IDS = [
-  "khtl9dcky3lb", // Dashboard
-  "qywmfv7jr0pd", // API
-  "51yszynm4xyv", // US Error Ingestion
-  "bdg4djkxjxmk", // US Transaction Ingestion
-  "cycj4r32g25w", // US Attachment Ingestion
-  "52t4t3ww2qcn", // US Profile Ingestion
-  "zxkxxtspk64g", // US Replay Ingestion
-  "qd7tzrk5q8xm", // US Span Ingestion
-  "6f1r28lydc6h", // US Cron Monitoring
-  "7wrqyj84ltw7", // Custom Metrics (beta)
-  "bctv81yt9s6w", // US Errors Alerting
-  "mbhk48shsbl8", // US Transactions Alerting
-  "rcdlp8rvtf7t", // US Spans Alerting
-  "fvsfbxc1mb16", // US Uptime Monitoring
-];
-
-// Mixpanel — US region + global services (excludes EU/India)
-const MIXPANEL_US_COMPONENT_IDS = [
-  "45yb5qck0sw5", // Application Availability (US)
-  "cq5ttq9czyjh", // Ingestion API Availability (US)
-  "7cdmvbkr0dyq", // JavaScript Library CDN
-  "tjt23lh5r46g", // Data Export
-  "v1kc88rj0qmw", // Warehouse Connectors
-];
-
-// PyPI — core service only (excludes 80+ Fastly CDN edge nodes)
-const PYPI_COMPONENT_IDS = [
-  "06hwjcnhlz03", // pypi.org - General
-  "xt7f24hjvspn", // pypi.org - CDN
-  "yjlyv2k3zz3p", // pypi.org - Backends
-  "frjs3hvgp2bk", // files.pythonhosted.org - Files
-  "p2b1wmgvmwln", // files.pythonhosted.org - Redirects
-  "nj4jx0hljzvl", // files.pythonhosted.org - Redirects Backends
-  "5k8sx11bnccq", // pypi.org - Email
-];
 
 function fetchSlack(apiUrl) {
   return async function () {

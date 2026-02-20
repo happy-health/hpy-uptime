@@ -296,6 +296,12 @@ class LocalHandler(SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+    def end_headers(self):
+        # Prevent browser caching of HTML files during local dev
+        if hasattr(self, 'path') and (self.path.endswith('.html') or self.path == '/'):
+            self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+
     def _cors_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
 
