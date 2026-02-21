@@ -1100,37 +1100,67 @@ for (const [g, i] of Object.entries(GLOBAL_TO_INTERNAL)) {
 
 const TEAM_MAPPINGS = {
   "End Users": [
+    // Core product
     "API Gateway", "API (Enso)", "API (CRO)",
     "Stytch Auth", "Stytch",
+    // Payments
     "Stripe", "Shopify",
+    // Data
     "DynamoDB", "Supabase",
-    "Twilio", "Twilio SMS (US)",
-    "AWS Lambda", "AWS S3",
+    // Notifications
+    "Twilio SMS (US)",
+    // Analytics (user-facing tracking)
+    "Segment", "Mixpanel",
+    // Content
+    "Sanity",
+    // Infrastructure (serving users)
+    "AWS Lambda", "AWS S3", "AWS RDS", "Host Health",
     "Cloudflare", "Vercel",
-    "AWS RDS", "Host Health",
+    // Mobile
+    "Apple Developer",
   ],
   "Clinicians": [
-    "API Gateway",
+    // Core API
+    "API Gateway", "API (Enso)",
     "Stytch Auth", "Stytch",
+    // Healthcare integrations
     "Candid Health", "Healthie", "OpenLoop",
+    // Data
     "DynamoDB", "Supabase",
-    "Twilio", "Twilio SMS (US)",
+    // Patient comms
+    "Twilio SMS (US)",
+    // Infrastructure
     "AWS RDS", "Host Health",
-  ],
-  "Developers": [
-    "Datadog", "Sentry",
-    "Inngest",
-    "AWS Lambda", "AWS S3",
-    "AWS RDS", "Host Health", "Disk Health",
-    "GitHub", "Bitbucket", "GitLab",
-    "npm Registry", "PyPI",
     "Cloudflare", "Vercel",
   ],
+  "Developers": [
+    // Observability
+    "Datadog", "Sentry", "Mixpanel",
+    // Workflow
+    "Inngest",
+    // Infrastructure
+    "AWS Lambda", "AWS S3", "AWS RDS",
+    "Host Health", "Disk Health",
+    "Cloudflare", "Vercel",
+    // Source control & packages
+    "GitHub", "Bitbucket",
+    "npm Registry", "PyPI",
+    // Analytics (debugging)
+    "Segment",
+  ],
   "Customer Support": [
-    "Slack", "Customer.io", "Twilio",
+    // Comms tools
+    "Slack", "Customer.io", "Twilio SMS (US)",
+    // Debugging tools
     "Datadog", "Sentry",
+    // Auth issues
     "Stytch Auth", "Stytch",
+    // Payment issues
     "Stripe", "Shopify",
+    // Healthcare queries
+    "Candid Health",
+    // Core API (checking if services are up)
+    "API Gateway",
   ],
 };
 
@@ -1254,6 +1284,32 @@ const PYPI_COMPONENT_IDS = [
   "5k8sx11bnccq", // pypi.org - Email
 ];
 
+// Vercel — core platform + US edge regions only (excludes 14 non-US edge PoPs)
+const VERCEL_US_COMPONENT_IDS = [
+  // Core platform
+  "kgcsn9c73xzf", // Serverless Functions
+  "pdnc30nkdqth", // Edge Functions
+  "1w4lc3s3q2pz", // Edge Middleware
+  "4byczsw70cgb", // DNS
+  "bc3cl3q4jn9m", // SSL Certificates
+  "rxynwj392p81", // API
+  "fk66q26xp7hh", // Dashboard
+  "7ckq6xr6nsbv", // Builds
+  "hpqj1ys9gr78", // Git Integrations
+  "fzmwv4gvx894", // Deploy Hooks
+  "dj2y0t2qjxc8", // Image Optimization
+  "jy5gmfw81mt7", // Data Cache
+  "jhhn5y2phjx8", // Blob
+  "3fm17p8bsb40", // Edge Config
+  "1vhy91zktp01", // Cron Jobs
+  "w94qwkg1z68w", // Domain Registration
+  // US edge regions
+  "s8mxhp2r4ztt", // CLE1 - Cleveland, East US
+  "jrd979g6ssl0", // IAD1 - Washington DC, USA
+  "1zjp6drr4vsp", // PDX1 - Portland, West US
+  "hb2s3rrdjnhb", // SFO1 - San Francisco, CA, USA
+];
+
 // ── Global service definitions (from public page) ───────────────────────
 
 const GLOBAL_SERVICES = [
@@ -1271,8 +1327,12 @@ const GLOBAL_SERVICES = [
     fetch: fetchStatuspageComponents("https://www.cloudflarestatus.com/api/v2/components.json", CLOUDFLARE_COMPONENT_IDS, "All core services operational"),
     incidentsUrl: "https://www.cloudflarestatus.com/api/v2/incidents.json",
   },
-  sp("Vercel", "Cloud & Hosting", "https://www.vercel-status.com",
-     "https://www.vercel-status.com"),
+  {
+    name: "Vercel", category: "Cloud & Hosting",
+    statusUrl: "https://www.vercel-status.com",
+    fetch: fetchStatuspageComponents("https://www.vercel-status.com/api/v2/components.json", VERCEL_US_COMPONENT_IDS, "All US services operational"),
+    incidentsUrl: "https://www.vercel-status.com/api/v2/incidents.json",
+  },
   {
     name: "Stytch", category: "Authentication",
     statusUrl: "https://status.stytch.com",
@@ -1336,12 +1396,6 @@ const GLOBAL_SERVICES = [
      "https://www.githubstatus.com"),
   sp("Bitbucket", "Source Control", "https://bitbucket.status.atlassian.com",
      "https://bitbucket.status.atlassian.com"),
-  {
-    name: "GitLab", category: "Source Control",
-    statusUrl: "https://status.gitlab.com",
-    fetch: fetchAtomFeed("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/rss", false),
-    historyFetch: fetchStatusIoHistory("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/status_chart/component/5b36e05f02d06804c0834a09/uptime"),
-  },
   sp("npm Registry", "Package Registries", "https://status.npmjs.org",
      "https://status.npmjs.org"),
   {

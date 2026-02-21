@@ -441,6 +441,32 @@ const PYPI_COMPONENT_IDS = [
   "5k8sx11bnccq", // pypi.org - Email
 ];
 
+// Vercel — core platform + US edge regions only (excludes 14 non-US edge PoPs)
+const VERCEL_US_COMPONENT_IDS = [
+  // Core platform
+  "kgcsn9c73xzf", // Serverless Functions
+  "pdnc30nkdqth", // Edge Functions
+  "1w4lc3s3q2pz", // Edge Middleware
+  "4byczsw70cgb", // DNS
+  "bc3cl3q4jn9m", // SSL Certificates
+  "rxynwj392p81", // API
+  "fk66q26xp7hh", // Dashboard
+  "7ckq6xr6nsbv", // Builds
+  "hpqj1ys9gr78", // Git Integrations
+  "fzmwv4gvx894", // Deploy Hooks
+  "dj2y0t2qjxc8", // Image Optimization
+  "jy5gmfw81mt7", // Data Cache
+  "jhhn5y2phjx8", // Blob
+  "3fm17p8bsb40", // Edge Config
+  "1vhy91zktp01", // Cron Jobs
+  "w94qwkg1z68w", // Domain Registration
+  // US edge regions
+  "s8mxhp2r4ztt", // CLE1 - Cleveland, East US
+  "jrd979g6ssl0", // IAD1 - Washington DC, USA
+  "1zjp6drr4vsp", // PDX1 - Portland, West US
+  "hb2s3rrdjnhb", // SFO1 - San Francisco, CA, USA
+];
+
 // ── Service definitions ─────────────────────────────────────────────────
 
 const SERVICES = [
@@ -459,8 +485,12 @@ const SERVICES = [
     fetch: fetchStatuspageComponents("https://www.cloudflarestatus.com/api/v2/components.json", CLOUDFLARE_COMPONENT_IDS, "All core services operational"),
     incidentsUrl: "https://www.cloudflarestatus.com/api/v2/incidents.json",
   },
-  sp("Vercel", "Cloud & Hosting", "https://www.vercel-status.com",
-     "https://www.vercel-status.com"),
+  {
+    name: "Vercel", category: "Cloud & Hosting",
+    statusUrl: "https://www.vercel-status.com",
+    fetch: fetchStatuspageComponents("https://www.vercel-status.com/api/v2/components.json", VERCEL_US_COMPONENT_IDS, "All US services operational"),
+    incidentsUrl: "https://www.vercel-status.com/api/v2/incidents.json",
+  },
 
   // ── Authentication ──────────────────────────────────────────────────
   {
@@ -538,11 +568,6 @@ const SERVICES = [
      "https://www.githubstatus.com"),
   sp("Bitbucket", "Source Control", "https://bitbucket.status.atlassian.com",
      "https://bitbucket.status.atlassian.com"),
-  {
-    name: "GitLab", category: "Source Control",
-    statusUrl: "https://status.gitlab.com",
-    fetch: fetchAtomFeed("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/rss", false),
-  },
 
   // ── Package Registries ──────────────────────────────────────────────
   sp("npm Registry", "Package Registries", "https://status.npmjs.org",
