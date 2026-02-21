@@ -494,6 +494,10 @@
 
     .bar-segment:hover::after { display: block; }
 
+    /* Anchor edge tooltips to prevent off-screen clipping */
+    .bar-segment:nth-child(-n+3)::after { left: 0; transform: none; }
+    .bar-segment:nth-last-child(-n+3)::after { left: auto; right: 0; transform: none; }
+
     .uptime-footer {
       display: flex;
       justify-content: space-between;
@@ -767,6 +771,143 @@
 
     .team-summary-counts span { display: inline-flex; align-items: center; gap: 0.25rem; }
 
+    /* ── Active issues panel ──────────────────────────── */
+
+    .active-issues {
+      margin-bottom: 1.25rem;
+      border: 1px solid rgba(248,81,73,0.25);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .active-issues-header {
+      background: rgba(248,81,73,0.06);
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--red);
+      border-bottom: 1px solid rgba(248,81,73,0.15);
+      cursor: pointer;
+    }
+
+    .active-issues-header .pulse-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--red);
+      animation: pulse 1.5s infinite;
+      flex-shrink: 0;
+    }
+
+    .active-issues-header .issue-count {
+      margin-left: auto;
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+    }
+
+    .active-issues.degraded-only {
+      border-color: rgba(210,153,34,0.25);
+    }
+
+    .active-issues.degraded-only .active-issues-header {
+      background: rgba(210,153,34,0.06);
+      color: var(--yellow);
+      border-bottom-color: rgba(210,153,34,0.15);
+    }
+
+    .active-issues.degraded-only .pulse-dot {
+      background: var(--yellow);
+    }
+
+    .active-issue-row {
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      background: var(--surface);
+    }
+
+    .active-issue-row:last-child { border-bottom: none; }
+
+    .active-issue-row .issue-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    .active-issue-row .issue-name {
+      font-weight: 500;
+      min-width: 120px;
+    }
+
+    .active-issue-row .issue-detail {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      flex: 1;
+    }
+
+    .active-issue-row .issue-badges {
+      display: flex;
+      gap: 0.4rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Active filter indicator ────────────────────────── */
+
+    .filter-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .filter-indicator .filter-label {
+      background: rgba(88,166,255,0.1);
+      border: 1px solid rgba(88,166,255,0.25);
+      color: var(--blue);
+      padding: 0.25rem 0.7rem;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 500;
+    }
+
+    .filter-indicator .filter-clear {
+      cursor: pointer;
+      font-size: 0.9rem;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+      line-height: 1;
+    }
+
+    .filter-indicator .filter-clear:hover { opacity: 1; }
+
+    /* ── Empty state ───────────────────────────────────── */
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state .empty-icon { font-size: 1.8rem; margin-bottom: 0.5rem; opacity: 0.5; }
+    .empty-state .empty-text { font-size: 0.9rem; }
+
+    /* ── Last updated timestamp ────────────────────────── */
+
+    .last-updated {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-align: right;
+      margin-bottom: 0.5rem;
+      opacity: 0.7;
+    }
+
     /* ── Animations ──────────────────────────────────────── */
 
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -786,6 +927,9 @@
       .team-pill { padding: 0.35rem 0.7rem; font-size: 0.72rem; }
       .team-summary-banner { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
       .team-summary-counts { margin-left: 0; }
+      .top-bar { flex-direction: column; align-items: flex-start; padding: 0.6rem 1rem; }
+      .top-bar-right { width: 100%; flex-wrap: wrap; justify-content: flex-start; gap: 0.4rem; }
+      .summary { gap: 0.4rem; }
     }
   </style>
 </head>
@@ -860,6 +1004,10 @@
 
   <div class="mismatch-alerts" id="mismatch-alerts"></div>
 
+  <div id="active-issues" style="display:none"></div>
+
+  <div id="last-updated" class="last-updated"></div>
+
   <div class="summary" id="summary-cards">
     <div class="summary-card" onclick="setStatusFilter('operational')" data-filter="operational">
       <div class="count count-operational" id="count-up">&ndash;</div>
@@ -873,10 +1021,6 @@
       <div class="count count-outage" id="count-outage">&ndash;</div>
       <div class="label">Outage</div>
     </div>
-    <div class="summary-card" onclick="setStatusFilter('mismatch')" data-filter="mismatch">
-      <div class="count count-mismatch" id="count-mismatch">&ndash;</div>
-      <div class="label">Mismatch</div>
-    </div>
   </div>
 
   <div class="legend">
@@ -889,6 +1033,8 @@
       <span>Ours (Datadog monitors)</span>
     </div>
   </div>
+
+  <div id="filter-indicator" class="filter-indicator" style="display:none"></div>
 
   <div id="services"></div>
 
@@ -916,7 +1062,7 @@ const IS_LOCAL = location.hostname === "localhost" || location.hostname === "127
 const LOCAL_LOGGED_OUT = sessionStorage.getItem("hpy-local-logged-out") === "1";
 let currentEnv = sessionStorage.getItem("hpy-env") || "prod";
 let API_BASE_URL = params.get("api_url") || sessionStorage.getItem("hpy-api-url-custom") || (IS_LOCAL ? "http://localhost:8787" : ENVIRONMENTS[currentEnv]?.url) || "";
-let API_KEY = sessionStorage.getItem("hpy-api-key-" + currentEnv) || params.get("api_key") || ((IS_LOCAL && !LOCAL_LOGGED_OUT) ? "test" : "") || "";
+let API_KEY = sessionStorage.getItem("hpy-api-key-" + currentEnv) || params.get("api_key") || (IS_LOCAL ? "test" : "") || "";
 let useCustomUrl = !!sessionStorage.getItem("hpy-api-url-custom") || !!params.get("api_url");
 const STYTCH_PUBLIC_TOKEN = params.get("stytch_token") || "";
 const PROXY_URL = params.get("proxy") || (IS_LOCAL ? "http://localhost:8787/proxy" : "");
@@ -935,7 +1081,7 @@ const GLOBAL_TO_INTERNAL = {
   "Stripe": "Stripe",
   "Shopify": "Shopify",
   "Supabase": "Supabase",
-  "Twilio": "Twilio",
+  "Twilio": "Twilio SMS (US)",
   "Slack": "Slack",
   "Customer.io": "Customer.io",
   "Datadog": "Datadog",
@@ -954,41 +1100,80 @@ for (const [g, i] of Object.entries(GLOBAL_TO_INTERNAL)) {
 
 const TEAM_MAPPINGS = {
   "End Users": [
+    // Core product
     "API Gateway", "API (Enso)", "API (CRO)",
     "Stytch Auth", "Stytch",
+    // Payments
     "Stripe", "Shopify",
+    // Data
     "DynamoDB", "Supabase",
-    "Twilio",
-    "AWS Lambda", "AWS S3",
+    // Notifications
+    "Twilio SMS (US)",
+    // Analytics (user-facing tracking)
+    "Segment", "Mixpanel",
+    // Content
+    "Sanity",
+    // Infrastructure (serving users)
+    "AWS Lambda", "AWS S3", "AWS RDS", "Host Health",
     "Cloudflare", "Vercel",
-    "AWS RDS", "Host Health",
+    // Mobile
+    "Apple Developer",
   ],
   "Clinicians": [
-    "API Gateway",
+    // Core API
+    "API Gateway", "API (Enso)",
     "Stytch Auth", "Stytch",
+    // Healthcare integrations
     "Candid Health", "Healthie", "OpenLoop",
+    // Data
     "DynamoDB", "Supabase",
-    "Twilio",
+    // Patient comms
+    "Twilio SMS (US)",
+    // Infrastructure
     "AWS RDS", "Host Health",
-  ],
-  "Developers": [
-    "Datadog", "Sentry",
-    "Inngest",
-    "AWS Lambda", "AWS S3",
-    "AWS RDS", "Host Health", "Disk Health",
-    "GitHub", "Bitbucket", "GitLab",
-    "npm Registry", "PyPI",
     "Cloudflare", "Vercel",
   ],
+  "Developers": [
+    // Observability
+    "Datadog", "Sentry", "Mixpanel",
+    // Workflow
+    "Inngest",
+    // Infrastructure
+    "AWS Lambda", "AWS S3", "AWS RDS",
+    "Host Health", "Disk Health",
+    "Cloudflare", "Vercel",
+    // Source control & packages
+    "GitHub", "Bitbucket",
+    "npm Registry", "PyPI",
+    // Analytics (debugging)
+    "Segment",
+  ],
   "Customer Support": [
-    "Slack", "Customer.io", "Twilio",
+    // Comms tools
+    "Slack", "Customer.io", "Twilio SMS (US)",
+    // Debugging tools
     "Datadog", "Sentry",
+    // Auth issues
     "Stytch Auth", "Stytch",
+    // Payment issues
     "Stripe", "Shopify",
+    // Healthcare queries
+    "Candid Health",
+    // Core API (checking if services are up)
+    "API Gateway",
   ],
 };
 
 const TEAM_ORDER = ["All", "End Users", "Clinicians", "Developers", "Customer Support"];
+
+// ── Fetch with timeout ──────────────────────────────────────────────────
+
+function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(timer));
+}
 
 // ── State ───────────────────────────────────────────────────────────────
 
@@ -1014,6 +1199,117 @@ const CATEGORY_ORDER = [
   "Package Registries", "Mobile Platforms", "Partner",
 ];
 
+// ── Component ID filters (must be defined before GLOBAL_SERVICES) ────────
+
+// Twilio SMS (US) — only SMS/MMS components in North America
+const TWILIO_SMS_US_COMPONENT_IDS = [
+  "yvvy3vlp4djf", // SMS (Programmable Messaging)
+  "d1j2nx64rpq3", // MMS (Programmable Messaging)
+  "x3z86l06nvl7", // Programmable Messaging API
+  "7d8w22hqrh6s", // SMS Long Code, North America
+  "39mb8cmw8y2v", // SMS Short Code, North America
+  "32f2bm54nkvv", // SMS Toll-Free, North America
+  "8vdlvw3dsq8h", // MMS Long Code, North America
+  "tvjwfvczkf46", // MMS Toll-Free, North America
+];
+
+// Cloudflare — core platform services only (excludes 450+ global edge PoPs)
+const CLOUDFLARE_COMPONENT_IDS = [
+  "5wnz34mhfhrk", // CDN/Cache
+  "dp8ppfycqxcs", // Authoritative DNS
+  "g4tb35rs9yw7", // API
+  "3sq3s4d20ywk", // Dashboard
+  "fbvx0hxhhdj0", // CDN Cache Purge
+  "ts05t1p1j7r4", // DNS Firewall
+  "4l9qztbt6rbj", // DNS Root Servers
+  "w4k8yvhfb3vp", // Access
+];
+
+// Segment — US region only (excludes EU)
+const SEGMENT_US_COMPONENT_IDS = [
+  "g6z8h6bwf010", // Data Ingestion (Tracking) API (US)
+  "c13tbpl4dm8m", // Web Interface (US)
+  "klyl7cz2012x", // Analytics.js CDN (US)
+  "7wv8256rdp62", // Streaming Destinations (US)
+  "h32n3sb6hz33", // Cloud Sources (US)
+  "ylfsvnn8hcs1", // Warehouse Destinations (US)
+  "804tjyrkwnlw", // Libraries (US)
+  "g6ncbp86zxm7", // Engage (US)
+  "58j460c4vffk", // Data Processing Pipeline (US)
+  "4snztn8n32qk", // Public API (US)
+  "yk53kzcsw671", // Blobstore Destinations (US)
+  "w392yz67sbxp", // Data Lakes (US)
+  "1jxpx3ysdvj1", // Data Deletions (US)
+  "hxjkwnmnyh7r", // Linked Audiences (US)
+  "yk55rmb9rlym", // Reverse ETL (US)
+  "zqj3vffxvytv", // Linked Events (US)
+  "m0n5pwdch93f", // Journeys (US)
+];
+
+// Sentry — US ingestion + US alerting + global services (excludes EU)
+const SENTRY_US_COMPONENT_IDS = [
+  "khtl9dcky3lb", // Dashboard
+  "qywmfv7jr0pd", // API
+  "51yszynm4xyv", // US Error Ingestion
+  "bdg4djkxjxmk", // US Transaction Ingestion
+  "cycj4r32g25w", // US Attachment Ingestion
+  "52t4t3ww2qcn", // US Profile Ingestion
+  "zxkxxtspk64g", // US Replay Ingestion
+  "qd7tzrk5q8xm", // US Span Ingestion
+  "6f1r28lydc6h", // US Cron Monitoring
+  "7wrqyj84ltw7", // Custom Metrics (beta)
+  "bctv81yt9s6w", // US Errors Alerting
+  "mbhk48shsbl8", // US Transactions Alerting
+  "rcdlp8rvtf7t", // US Spans Alerting
+  "fvsfbxc1mb16", // US Uptime Monitoring
+];
+
+// Mixpanel — US region + global services (excludes EU/India)
+const MIXPANEL_US_COMPONENT_IDS = [
+  "45yb5qck0sw5", // Application Availability (US)
+  "cq5ttq9czyjh", // Ingestion API Availability (US)
+  "7cdmvbkr0dyq", // JavaScript Library CDN
+  "tjt23lh5r46g", // Data Export
+  "v1kc88rj0qmw", // Warehouse Connectors
+];
+
+// PyPI — core service only (excludes 80+ Fastly CDN edge nodes)
+const PYPI_COMPONENT_IDS = [
+  "06hwjcnhlz03", // pypi.org - General
+  "xt7f24hjvspn", // pypi.org - CDN
+  "yjlyv2k3zz3p", // pypi.org - Backends
+  "frjs3hvgp2bk", // files.pythonhosted.org - Files
+  "p2b1wmgvmwln", // files.pythonhosted.org - Redirects
+  "nj4jx0hljzvl", // files.pythonhosted.org - Redirects Backends
+  "5k8sx11bnccq", // pypi.org - Email
+];
+
+// Vercel — core platform + US edge regions only (excludes 14 non-US edge PoPs)
+const VERCEL_US_COMPONENT_IDS = [
+  // Core platform
+  "kgcsn9c73xzf", // Serverless Functions
+  "pdnc30nkdqth", // Edge Functions
+  "1w4lc3s3q2pz", // Edge Middleware
+  "4byczsw70cgb", // DNS
+  "bc3cl3q4jn9m", // SSL Certificates
+  "rxynwj392p81", // API
+  "fk66q26xp7hh", // Dashboard
+  "7ckq6xr6nsbv", // Builds
+  "hpqj1ys9gr78", // Git Integrations
+  "fzmwv4gvx894", // Deploy Hooks
+  "dj2y0t2qjxc8", // Image Optimization
+  "jy5gmfw81mt7", // Data Cache
+  "jhhn5y2phjx8", // Blob
+  "3fm17p8bsb40", // Edge Config
+  "1vhy91zktp01", // Cron Jobs
+  "w94qwkg1z68w", // Domain Registration
+  // US edge regions
+  "s8mxhp2r4ztt", // CLE1 - Cleveland, East US
+  "jrd979g6ssl0", // IAD1 - Washington DC, USA
+  "1zjp6drr4vsp", // PDX1 - Portland, West US
+  "hb2s3rrdjnhb", // SFO1 - San Francisco, CA, USA
+];
+
 // ── Global service definitions (from public page) ───────────────────────
 
 const GLOBAL_SERVICES = [
@@ -1025,10 +1321,18 @@ const GLOBAL_SERVICES = [
      null, "https://azurestatuscdn.azureedge.net/en-us/status/feed/", true, "atom"),
   sp("Oracle Cloud", "Cloud & Hosting", "https://ocistatus.oraclecloud.com",
      null, "https://ocistatus.oraclecloud.com/api/v2/incident-summary.rss", false, "atom"),
-  sp("Cloudflare", "Cloud & Hosting", "https://www.cloudflarestatus.com",
-     "https://www.cloudflarestatus.com"),
-  sp("Vercel", "Cloud & Hosting", "https://www.vercel-status.com",
-     "https://www.vercel-status.com"),
+  {
+    name: "Cloudflare", category: "Cloud & Hosting",
+    statusUrl: "https://www.cloudflarestatus.com",
+    fetch: fetchStatuspageComponents("https://www.cloudflarestatus.com/api/v2/components.json", CLOUDFLARE_COMPONENT_IDS, "All core services operational"),
+    incidentsUrl: "https://www.cloudflarestatus.com/api/v2/incidents.json",
+  },
+  {
+    name: "Vercel", category: "Cloud & Hosting",
+    statusUrl: "https://www.vercel-status.com",
+    fetch: fetchStatuspageComponents("https://www.vercel-status.com/api/v2/components.json", VERCEL_US_COMPONENT_IDS, "All US services operational"),
+    incidentsUrl: "https://www.vercel-status.com/api/v2/incidents.json",
+  },
   {
     name: "Stytch", category: "Authentication",
     statusUrl: "https://status.stytch.com",
@@ -1052,8 +1356,12 @@ const GLOBAL_SERVICES = [
      "https://status.supabase.com"),
   sp("Sanity", "CMS", "https://www.sanity-status.com",
      "https://www.sanity-status.com"),
-  sp("Twilio", "Communications", "https://status.twilio.com",
-     "https://status.twilio.com"),
+  {
+    name: "Twilio SMS (US)", category: "Communications",
+    statusUrl: "https://status.twilio.com",
+    fetch: fetchStatuspageComponents("https://status.twilio.com/api/v2/components.json", TWILIO_SMS_US_COMPONENT_IDS, "All SMS systems operational"),
+    incidentsUrl: "https://status.twilio.com/api/v2/incidents.json",
+  },
   {
     name: "Slack", category: "Communications",
     statusUrl: "https://slack-status.com",
@@ -1062,30 +1370,40 @@ const GLOBAL_SERVICES = [
   },
   sp("Customer.io", "Communications", "https://status.customerio.com",
      "https://status.customerio.com"),
-  sp("Segment", "Communications", "https://status.segment.com",
-     "https://status.segment.com"),
+  {
+    name: "Segment", category: "Communications",
+    statusUrl: "https://status.segment.com",
+    fetch: fetchStatuspageComponents("https://status.segment.com/api/v2/components.json", SEGMENT_US_COMPONENT_IDS, "All US systems operational"),
+    incidentsUrl: "https://status.segment.com/api/v2/incidents.json",
+  },
   sp("Datadog", "Observability", "https://status.datadoghq.com",
      "https://status.datadoghq.com"),
-  sp("Sentry", "Observability", "https://status.sentry.io",
-     "https://status.sentry.io"),
-  sp("Mixpanel", "Observability", "https://www.mixpanelstatus.com",
-     "https://www.mixpanelstatus.com"),
+  {
+    name: "Sentry", category: "Observability",
+    statusUrl: "https://status.sentry.io",
+    fetch: fetchStatuspageComponents("https://status.sentry.io/api/v2/components.json", SENTRY_US_COMPONENT_IDS, "All US systems operational"),
+    incidentsUrl: "https://status.sentry.io/api/v2/incidents.json",
+  },
+  {
+    name: "Mixpanel", category: "Observability",
+    statusUrl: "https://www.mixpanelstatus.com",
+    fetch: fetchStatuspageComponents("https://www.mixpanelstatus.com/api/v2/components.json", MIXPANEL_US_COMPONENT_IDS, "All US systems operational"),
+    incidentsUrl: "https://www.mixpanelstatus.com/api/v2/incidents.json",
+  },
   sp("Inngest", "Workflow", "https://status.inngest.com",
      "https://status.inngest.com"),
   sp("GitHub", "Source Control", "https://www.githubstatus.com",
      "https://www.githubstatus.com"),
   sp("Bitbucket", "Source Control", "https://bitbucket.status.atlassian.com",
      "https://bitbucket.status.atlassian.com"),
-  {
-    name: "GitLab", category: "Source Control",
-    statusUrl: "https://status.gitlab.com",
-    fetch: fetchAtomFeed("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/rss", false),
-    historyFetch: fetchStatusIoHistory("https://status.gitlab.com/pages/5b36dc6502d06804c08349f7/status_chart/component/5b36e05f02d06804c0834a09/uptime"),
-  },
   sp("npm Registry", "Package Registries", "https://status.npmjs.org",
      "https://status.npmjs.org"),
-  sp("PyPI", "Package Registries", "https://status.python.org",
-     "https://status.python.org"),
+  {
+    name: "PyPI", category: "Package Registries",
+    statusUrl: "https://status.python.org",
+    fetch: fetchStatuspageComponents("https://status.python.org/api/v2/components.json", PYPI_COMPONENT_IDS, "All systems operational"),
+    incidentsUrl: "https://status.python.org/api/v2/incidents.json",
+  },
   {
     name: "Apple Developer", category: "Mobile Platforms",
     statusUrl: "https://developer.apple.com/system-status/",
@@ -1124,7 +1442,7 @@ function proxyWrap(url, needsProxy) {
 
 function fetchStatuspage(apiUrl) {
   return async function () {
-    const resp = await fetch(apiUrl, { cache: "no-store" });
+    const resp = await fetchWithTimeout(apiUrl, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const data = await resp.json();
     const indicator = data.status?.indicator || "none";
@@ -1136,7 +1454,7 @@ function fetchStatuspage(apiUrl) {
 
 function fetchInstatus(apiUrl) {
   return async function () {
-    const resp = await fetch(apiUrl, { cache: "no-store" });
+    const resp = await fetchWithTimeout(apiUrl, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const data = await resp.json();
     const status = data.page?.status || "UNKNOWN";
@@ -1150,21 +1468,22 @@ function fetchInstatus(apiUrl) {
 
 function fetchSlack(apiUrl) {
   return async function () {
-    const resp = await fetch(apiUrl, { cache: "no-store" });
+    const resp = await fetchWithTimeout(apiUrl, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const data = await resp.json();
-    if (data.status === "ok" || (data.active_incidents || []).length === 0) {
+    const incidents = data.active_incidents || [];
+    if (data.status === "ok" || incidents.length === 0) {
       return { level: "operational", description: "All Systems Operational" };
     }
-    const inc = data.active_incidents[0];
-    const level = inc.type === "outage" ? "major" : "degraded";
-    return { level, description: inc.title || "Active incident" };
+    const inc = incidents[0];
+    const level = inc?.type === "outage" ? "major" : "degraded";
+    return { level, description: inc?.title || "Active incident" };
   };
 }
 
 function fetchUptimeRobot(apiUrl) {
   return async function () {
-    const resp = await fetch(apiUrl, { cache: "no-store" });
+    const resp = await fetchWithTimeout(apiUrl, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const data = await resp.json();
     const counts = data.statistics?.counts || {};
@@ -1178,7 +1497,7 @@ function fetchUptimeRobot(apiUrl) {
 function fetchStripe(apiUrl) {
   return async function () {
     const url = proxyWrap(apiUrl, true);
-    const resp = await fetch(url, { cache: "no-store" });
+    const resp = await fetchWithTimeout(url, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const data = await resp.json();
     const levelMap = { up: "operational", degraded: "degraded", down: "major" };
@@ -1189,10 +1508,36 @@ function fetchStripe(apiUrl) {
   };
 }
 
+// ── Component-scoped Statuspage fetcher (filters to specific component IDs) ──
+
+function fetchStatuspageComponents(apiUrl, componentIds, okMessage) {
+  const idSet = new Set(componentIds);
+  return async function () {
+    const resp = await fetchWithTimeout(apiUrl, { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const data = await resp.json();
+    const components = (data.components || []).filter(c => idSet.has(c.id));
+    const statusMap = { operational: 0, degraded_performance: 1, partial_outage: 2, major_outage: 3 };
+    const levelMap = { operational: "operational", degraded_performance: "degraded", partial_outage: "partial", major_outage: "major" };
+    let worstStatus = "operational";
+    let worstSev = 0;
+    const issues = [];
+    for (const c of components) {
+      const sev = statusMap[c.status] ?? 0;
+      if (sev > worstSev) { worstSev = sev; worstStatus = c.status; }
+      if (sev > 0) issues.push(c.name + ": " + c.status.replace(/_/g, " "));
+    }
+    return {
+      level: levelMap[worstStatus] || "operational",
+      description: issues.length > 0 ? issues.join("; ") : (okMessage || "All systems operational"),
+    };
+  };
+}
+
 function fetchAtomFeed(feedUrl, needsProxy) {
   return async function () {
     const url = proxyWrap(feedUrl, needsProxy);
-    const resp = await fetch(url, { cache: "no-store" });
+    const resp = await fetchWithTimeout(url, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const text = await resp.text();
     const parser = new DOMParser();
@@ -1224,7 +1569,7 @@ function fetchAtomFeed(feedUrl, needsProxy) {
 function fetchApple(apiUrl) {
   return async function () {
     const url = proxyWrap(apiUrl, true);
-    const resp = await fetch(url, { cache: "no-store" });
+    const resp = await fetchWithTimeout(url, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const text = await resp.text();
     const match = text.match(/jsonCallback\((.+)\)/s);
@@ -1246,7 +1591,7 @@ function fetchStripeHistory(apiUrl) {
   // status.stripe.com/current/full returns 90 days of daily uptime data per sub-service
   return async function (name) {
     const url = proxyWrap(apiUrl, true);
-    const resp = await fetch(url, { cache: "no-store" });
+    const resp = await fetchWithTimeout(url, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const data = await resp.json();
     if (!globalHistory[name]) globalHistory[name] = {};
@@ -1282,7 +1627,7 @@ function fetchStripeHistory(apiUrl) {
 function fetchSlackHistory(apiUrl) {
   // slack-status.com/api/v2.0.0/history returns all past incidents
   return async function (name) {
-    const resp = await fetch(apiUrl, { cache: "no-store" });
+    const resp = await fetchWithTimeout(apiUrl, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const incidents = await resp.json();
     if (!globalHistory[name]) globalHistory[name] = {};
@@ -1310,7 +1655,7 @@ function fetchSlackHistory(apiUrl) {
 function fetchUptimeRobotHistory(apiUrl) {
   // UptimeRobot getMonitorList already returns dailyRatios with 90 days of data
   return async function (name) {
-    const resp = await fetch(apiUrl, { cache: "no-store" });
+    const resp = await fetchWithTimeout(apiUrl, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const data = await resp.json();
     if (!globalHistory[name]) globalHistory[name] = {};
@@ -1346,11 +1691,11 @@ function fetchUptimeRobotHistory(apiUrl) {
 function fetchStatusIoHistory(uptimeUrl) {
   // Status.io status_chart uptime endpoint returns 91 days of daily status
   return async function (name) {
-    let resp = await fetch(uptimeUrl, { cache: "no-store" }).catch(() => null);
+    let resp = await fetchWithTimeout(uptimeUrl, { cache: "no-store" }).catch(() => null);
     // Fallback to proxy if CORS blocks direct fetch
     if (!resp || !resp.ok) {
       const proxied = proxyWrap(uptimeUrl, true);
-      if (proxied !== uptimeUrl) resp = await fetch(proxied, { cache: "no-store" });
+      if (proxied !== uptimeUrl) resp = await fetchWithTimeout(proxied, { cache: "no-store" });
     }
     if (!resp || !resp.ok) throw new Error("HTTP " + (resp?.status || "fetch failed"));
     const data = await resp.json();
@@ -1382,7 +1727,7 @@ function fetchAtomHistory(feedUrl, needsProxy) {
   // Parse an Atom/RSS feed and backfill 90 days of history from incident entries
   return async function (name) {
     const url = proxyWrap(feedUrl, needsProxy);
-    const resp = await fetch(url, { cache: "no-store" });
+    const resp = await fetchWithTimeout(url, { cache: "no-store" });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const text = await resp.text();
     const parser = new DOMParser();
@@ -1483,6 +1828,15 @@ document.addEventListener("keydown", function(e) {
 });
 
 async function initAuth() {
+  // On localhost, always bypass login gate — no auth needed for local dev
+  if (IS_LOCAL) {
+    API_KEY = "test";
+    API_BASE_URL = "http://localhost:8787";
+    showDashboard();
+    refreshAll();
+    return;
+  }
+
   // Restore login form state from sessionStorage
   if (currentEnv) setLoginEnv(currentEnv);
   if (useCustomUrl) {
@@ -1498,17 +1852,6 @@ async function initAuth() {
     return;
   }
 
-  // On localhost, simplify the login gate
-  if (IS_LOCAL) {
-    document.getElementById("input-api-key").value = "test";
-    document.getElementById("login-env-toggle").style.display = "none";
-    document.getElementById("custom-url-link").style.display = "none";
-    document.getElementById("stytch-login").innerHTML =
-      '<p style="color:var(--text-muted);font-size:0.78rem;padding:0.75rem;text-align:center">' +
-      'Running on <strong>localhost</strong> &mdash; click Unlock or press Enter to continue.</p>';
-    return;
-  }
-
   if (!STYTCH_PUBLIC_TOKEN) {
     document.getElementById("stytch-login").innerHTML =
       '<p style="color:var(--text-muted);font-size:0.78rem;padding:0.75rem;text-align:center">' +
@@ -1518,6 +1861,11 @@ async function initAuth() {
 
   const script = document.createElement("script");
   script.src = "https://js.stytch.com/stytch.js";
+  script.onerror = () => {
+    console.error("Failed to load Stytch SDK");
+    document.getElementById("stytch-login").innerHTML =
+      '<p style="color:var(--text-muted);font-size:0.85rem">Authentication service unavailable. Try refreshing the page.</p>';
+  };
   script.onload = () => {
     stytchClient = new window.StytchUIClient(STYTCH_PUBLIC_TOKEN);
     const session = stytchClient.session.getSync();
@@ -1629,7 +1977,8 @@ function toggleExpandAll() {
     for (const svc of dualServices) expandedServices.add(svc.name);
     allExpanded = true;
   }
-  document.getElementById("expand-all-btn").textContent = allExpanded ? "Collapse All" : "Expand All";
+  const btn = document.getElementById("expand-all-btn");
+  if (btn) btn.textContent = allExpanded ? "Collapse All" : "Expand All";
   render();
 }
 
@@ -1667,9 +2016,10 @@ function getDayKey(date) { return date.toISOString().split("T")[0]; }
 
 function getLast90Days() {
   const days = [];
+  const now = new Date(); // Use single base date to avoid midnight boundary issues
   for (let i = HISTORY_DAYS - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
     days.push(getDayKey(d));
   }
   return days;
@@ -1692,7 +2042,7 @@ function loadStorage(key) {
 function saveStorage(key, data) {
   try {
     const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 120);
+    cutoff.setDate(cutoff.getDate() - (HISTORY_DAYS + 5));
     const cutoffStr = getDayKey(cutoff);
     for (const svc of Object.keys(data)) {
       for (const day of Object.keys(data[svc])) {
@@ -1714,9 +2064,11 @@ function recordGlobalStatus(name, level) {
 }
 
 function recordInternalStatus(name, level) {
+  // Don't record "unknown" — it means "not monitored", not an actual status
+  if (level === "unknown") return;
   const today = getDayKey(new Date());
   if (!internalHistory[name]) internalHistory[name] = {};
-  const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3, unknown: -1 };
+  const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3 };
   const current = internalHistory[name][today];
   const curSev = SEVERITY[current] ?? -1;
   const newSev = SEVERITY[level] ?? -1;
@@ -1746,7 +2098,7 @@ async function fetchGlobalStatuses() {
 async function fetchInternalStatuses() {
   if (!API_BASE_URL) return;
   try {
-    const resp = await fetch(API_BASE_URL + "/v2/status/internal", {
+    const resp = await fetchWithTimeout(API_BASE_URL + "/v2/status/internal", {
       headers: getAuthHeaders(),
       cache: "no-store",
     });
@@ -1762,6 +2114,10 @@ async function fetchInternalStatuses() {
 
     for (const svc of internalServices) {
       recordInternalStatus(svc.name, svc.level);
+      // Purge stale history for unmonitored services (e.g. leftover mock data)
+      if (svc.level === "unknown" && internalHistory[svc.name]) {
+        delete internalHistory[svc.name];
+      }
     }
     saveStorage(STORAGE_KEY_INTERNAL, internalHistory);
 
@@ -1773,7 +2129,10 @@ async function fetchInternalStatuses() {
   }
 }
 
+let _refreshing = false;
 async function refreshAll() {
+  if (_refreshing) return; // Prevent overlapping refreshes
+  _refreshing = true;
   countdownSeconds = REFRESH_INTERVAL;
 
   // Clear previous error state
@@ -1800,10 +2159,19 @@ async function refreshAll() {
   const monitorText = totalMonitors
     ? totalMonitors + (isMockData ? " monitors (mock)" : " Datadog monitors tracked")
     : "";
-  document.getElementById("monitor-count").textContent = monitorText;
+  const monEl = document.getElementById("monitor-count");
+  if (monEl) monEl.textContent = monitorText;
+
+  // Update "last updated" timestamp
+  const lastUpdatedEl = document.getElementById("last-updated");
+  if (lastUpdatedEl) {
+    const now = new Date();
+    lastUpdatedEl.textContent = "Updated " + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
 
   // Backfill global history
   populateIncidentHistory();
+  _refreshing = false;
 }
 
 async function populateIncidentHistory() {
@@ -1816,7 +2184,7 @@ async function populateIncidentHistory() {
   for (const svc of GLOBAL_SERVICES.filter(s => s.incidentsUrl)) {
     promises.push((async () => {
       try {
-        const resp = await fetch(svc.incidentsUrl, { cache: "no-store" });
+        const resp = await fetchWithTimeout(svc.incidentsUrl, { cache: "no-store" });
         if (!resp.ok) return;
         const data = await resp.json();
         if (!globalHistory[svc.name]) globalHistory[svc.name] = {};
@@ -2006,22 +2374,27 @@ function setTeamFilter(team) {
 }
 
 function setStatusFilter(filter) {
-  // Toggle: clicking the active filter clears it
-  currentStatusFilter = currentStatusFilter === filter ? null : filter;
+  // Toggle: clicking the active filter clears it; null always clears
+  currentStatusFilter = (filter === null || currentStatusFilter === filter) ? null : filter;
   render();
 }
 
-function serviceMatchesStatusFilter(svc, filter) {
-  // A service can match multiple filters (e.g. degraded AND mismatch)
+function isServiceUnmonitored(svc) {
+  return svc.internal && svc.internal.level === "unknown";
+}
+
+function getServiceWorstKnownLevel(svc) {
   const levels = [];
   if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
   if (svc.internal && svc.internal.level !== "unknown") levels.push(svc.internal.level);
-  const worst = getWorstLevel(levels);
+  return getWorstLevel(levels);
+}
 
-  if (filter === "mismatch") return !!getMismatchType(svc);
+function serviceMatchesStatusFilter(svc, filter) {
+  const worst = getServiceWorstKnownLevel(svc);
   if (filter === "outage") return worst === "major";
   if (filter === "degraded") return worst === "degraded" || worst === "partial";
-  if (filter === "operational") return worst === "operational";
+  if (filter === "operational") return worst === "operational" || worst === "unknown";
   return true;
 }
 
@@ -2078,9 +2451,37 @@ function render() {
     });
   }
 
+  // Render active filter indicator
+  const indicatorEl = document.getElementById("filter-indicator");
+  if (indicatorEl) {
+    if (currentStatusFilter) {
+      const labels = { operational: "Operational", degraded: "Degraded", outage: "Outage" };
+      indicatorEl.style.display = "flex";
+      indicatorEl.innerHTML =
+        'Showing: <span class="filter-label">' + (labels[currentStatusFilter] || currentStatusFilter) +
+        ' <span class="filter-clear" onclick="setStatusFilter(null)">&times;</span></span>';
+    } else {
+      indicatorEl.style.display = "none";
+    }
+  }
+
   // Apply status filter
   if (currentStatusFilter) {
     filtered = filtered.filter(s => serviceMatchesStatusFilter(s, currentStatusFilter));
+  }
+
+  // Empty state when filter yields no results
+  if (filtered.length === 0 && currentStatusFilter) {
+    container.innerHTML =
+      '<div class="empty-state">' +
+      '<div class="empty-icon">&#x2205;</div>' +
+      '<div class="empty-text">No services match the "' + escapeHtml(currentStatusFilter) + '" filter</div>' +
+      '</div>';
+    renderActiveIssues(unified);
+    renderMismatchAlerts();
+    updateSummary(unified);
+    updateBanner(unified);
+    return;
   }
 
   // Group by category
@@ -2109,6 +2510,7 @@ function render() {
     container.appendChild(group);
   }
 
+  renderActiveIssues(unified);
   renderMismatchAlerts();
   updateSummary(unified);
   updateBanner(unified);
@@ -2181,15 +2583,19 @@ function renderServiceRow(svc) {
 
   const days = getLast90Days();
 
+  const isUnmonitored = svc.internal && svc.internal.level === "unknown";
+
   if (hasBoth) {
     // Merged bar (always visible)
     html += renderMergedBar(days, svc);
 
-    // Expanded dual bars
+    // Expanded dual bars — skip ours bar for unmonitored services
     html += '<div class="bar-detail' + (isExpanded ? " open" : "") + '">';
     html += '<div class="bar-pair">';
     html += renderUptimeBar(days, svc.globalHistoryKey, globalHistory, "Global", "global-label", false);
-    html += renderUptimeBar(days, svc.internalHistoryKey, internalHistory, "Ours", "ours-label", false);
+    if (!isUnmonitored) {
+      html += renderUptimeBar(days, svc.internalHistoryKey, internalHistory, "Ours", "ours-label", false);
+    }
     html += '</div>';
     html += '</div>';
 
@@ -2205,8 +2611,8 @@ function renderServiceRow(svc) {
       }
       html += '</div>';
     }
-  } else {
-    // Single bar
+  } else if (!isUnmonitored) {
+    // Single bar — skip for unmonitored internal-only services
     const histKey = svc.globalHistoryKey || svc.internalHistoryKey;
     const hist = svc.global ? globalHistory : internalHistory;
     const label = svc.internal ? "Ours" : "Global";
@@ -2250,7 +2656,8 @@ function renderServiceRow(svc) {
       const unified = buildUnifiedServiceList();
       const dualCount = unified.filter(s => s.global && s.internal).length;
       allExpanded = expandedServices.size >= dualCount;
-      document.getElementById("expand-all-btn").textContent = allExpanded ? "Collapse All" : "Expand All";
+      const eBtn = document.getElementById("expand-all-btn");
+      if (eBtn) eBtn.textContent = allExpanded ? "Collapse All" : "Expand All";
       render();
     });
   }
@@ -2276,7 +2683,9 @@ function renderMergedBar(days, svc) {
   const SEVERITY = { operational: 0, degraded: 1, partial: 2, major: 3, error: -1, unknown: -1, loading: -1 };
   const LEVEL_BY_SEV = ["operational", "degraded", "partial", "major"];
   const gHist = svc.globalHistoryKey ? globalHistory[svc.globalHistoryKey] || {} : {};
-  const iHist = svc.internalHistoryKey ? internalHistory[svc.internalHistoryKey] || {} : {};
+  // Skip internal history for unmonitored services — no real data to show
+  const isUnmonitored = svc.internal && svc.internal.level === "unknown";
+  const iHist = (!isUnmonitored && svc.internalHistoryKey) ? internalHistory[svc.internalHistoryKey] || {} : {};
 
   let html = '<div class="bar-label" style="color:var(--text-muted)">Combined</div>';
   html += '<div class="uptime-bar single">';
@@ -2289,7 +2698,7 @@ function renderMergedBar(days, svc) {
     const level = worstSev >= 0 ? LEVEL_BY_SEV[worstSev] : "unknown";
     const barClass = "bar-" + level;
     const tipG = gDay ? capitalize(gDay) : "No data";
-    const tipI = iDay ? capitalize(iDay) : "No data";
+    const tipI = isUnmonitored ? "Not monitored" : (iDay ? capitalize(iDay) : "No data");
     html += '<div class="bar-segment ' + barClass + '" data-tip="' + formatDate(day) + ' \u2014 Global: ' + tipG + ', Ours: ' + tipI + '"></div>';
   }
   html += '</div>';
@@ -2311,6 +2720,86 @@ function getMismatchType(svc) {
   return null;
 }
 
+function renderActiveIssues(unified) {
+  const container = document.getElementById("active-issues");
+  if (!container) return;
+
+  // Find services with active problems (non-operational, non-unknown, non-loading)
+  const problemServices = unified.filter(svc => {
+    const levels = [];
+    if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
+    if (svc.internal && svc.internal.level !== "unknown") levels.push(svc.internal.level);
+    const worst = getWorstLevel(levels);
+    return worst === "major" || worst === "degraded" || worst === "partial";
+  });
+
+  if (problemServices.length === 0) {
+    container.style.display = "none";
+    return;
+  }
+
+  const hasOutage = problemServices.some(svc => {
+    const levels = [];
+    if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
+    if (svc.internal && svc.internal.level !== "unknown") levels.push(svc.internal.level);
+    return getWorstLevel(levels) === "major";
+  });
+
+  let html = '<div class="active-issues' + (hasOutage ? '' : ' degraded-only') + '">';
+  html += '<div class="active-issues-header" onclick="setStatusFilter(\'degraded\')">';
+  html += '<span class="pulse-dot"></span>';
+  html += (hasOutage ? 'Active Issues' : 'Degraded Services');
+  html += '<span class="issue-count">' + problemServices.length + ' affected</span>';
+  html += '</div>';
+
+  for (const svc of problemServices) {
+    const levels = [];
+    if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") levels.push(svc.global.level);
+    if (svc.internal && svc.internal.level !== "unknown") levels.push(svc.internal.level);
+    const worst = getWorstLevel(levels);
+    const dotColor = worst === "major" ? "var(--red)" : worst === "partial" ? "var(--orange)" : "var(--yellow)";
+
+    // Build detail text
+    const parts = [];
+    if (svc.global && svc.global.level !== "operational" && svc.global.level !== "loading" && svc.global.level !== "error") {
+      parts.push("Global: " + (svc.global.description || capitalize(svc.global.level)));
+    }
+    if (svc.internal && svc.internal.level !== "unknown" && svc.internal.level !== "operational") {
+      parts.push("Ours: " + (svc.internal.description || capitalize(svc.internal.level)));
+    }
+
+    html += '<div class="active-issue-row">';
+    html += '<span class="issue-dot" style="background:' + dotColor + '"></span>';
+    html += '<span class="issue-name">' + escapeHtml(svc.displayName) + '</span>';
+    html += '<span class="issue-detail">' + escapeHtml(parts.join(" · ")) + '</span>';
+
+    // Badges
+    html += '<span class="issue-badges">';
+    if (svc.global && svc.global.level !== "loading" && svc.global.level !== "error") {
+      const gl = svc.global.level;
+      html += '<span class="status-badge badge-' + gl + '" style="font-size:0.68rem;padding:0.1rem 0.4rem">';
+      html += '<span class="badge-dot" style="width:6px;height:6px"></span>' + capitalize(gl) + '</span>';
+    }
+    if (svc.internal && svc.internal.level !== "unknown") {
+      const il = svc.internal.level;
+      const ddUrl = buildDatadogUrl(svc.ddTags || []);
+      if ((il === "major" || il === "degraded" || il === "partial") && ddUrl) {
+        html += '<a href="' + ddUrl + '" target="_blank" rel="noopener" class="status-badge badge-' + il + '" style="font-size:0.68rem;padding:0.1rem 0.4rem;text-decoration:none">';
+        html += '<span class="badge-dot" style="width:6px;height:6px"></span>' + capitalize(il) + '</a>';
+      } else {
+        html += '<span class="status-badge badge-' + il + '" style="font-size:0.68rem;padding:0.1rem 0.4rem">';
+        html += '<span class="badge-dot" style="width:6px;height:6px"></span>' + capitalize(il) + '</span>';
+      }
+    }
+    html += '</span>';
+    html += '</div>';
+  }
+
+  html += '</div>';
+  container.style.display = "block";
+  container.innerHTML = html;
+}
+
 function renderMismatchAlerts() {
   const container = document.getElementById("mismatch-alerts");
   const mismatches = detectMismatches();
@@ -2330,16 +2819,20 @@ function renderMismatchAlerts() {
 }
 
 function updateSummary(unified) {
-  // Count using the same logic as the filter so numbers match rows when clicked
-  const up = unified.filter(s => serviceMatchesStatusFilter(s, "operational")).length;
-  const degraded = unified.filter(s => serviceMatchesStatusFilter(s, "degraded")).length;
-  const outage = unified.filter(s => serviceMatchesStatusFilter(s, "outage")).length;
-  const mismatchCount = unified.filter(s => serviceMatchesStatusFilter(s, "mismatch")).length;
+  // Mutually exclusive counts: each service counted once (outage > degraded > operational)
+  let up = 0, degraded = 0, outage = 0;
+  for (const svc of unified) {
+    const worst = getServiceWorstKnownLevel(svc);
+    if (worst === "major") outage++;
+    else if (worst === "degraded" || worst === "partial") degraded++;
+    else up++;
+  }
 
-  document.getElementById("count-up").textContent = up;
-  document.getElementById("count-degraded").textContent = degraded;
-  document.getElementById("count-outage").textContent = outage;
-  document.getElementById("count-mismatch").textContent = mismatchCount;
+  const els = { "count-up": up, "count-degraded": degraded, "count-outage": outage };
+  for (const [id, val] of Object.entries(els)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
 }
 
 function getWorstLevel(levels) {
@@ -2427,11 +2920,16 @@ function updateDataSourceBadge(data) {
 
 function startCountdown() {
   if (countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = null;
   countdownSeconds = REFRESH_INTERVAL;
   countdownTimer = setInterval(() => {
     countdownSeconds--;
-    document.getElementById("countdown").textContent = "Refreshing in " + countdownSeconds + "s";
-    if (countdownSeconds <= 0) refreshAll();
+    const el = document.getElementById("countdown");
+    if (el) el.textContent = "Refreshing in " + countdownSeconds + "s";
+    if (countdownSeconds <= 0) {
+      countdownSeconds = REFRESH_INTERVAL;
+      refreshAll();
+    }
   }, 1000);
 }
 

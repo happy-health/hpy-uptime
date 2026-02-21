@@ -18,7 +18,7 @@ MOCK_RESPONSE = {
         {"name": "Shopify", "category": "Payments", "level": "operational", "description": "All 2 monitors OK", "monitor_count": 2, "alert_count": 0, "warn_count": 0},
         {"name": "DynamoDB", "category": "Database", "level": "operational", "description": "All 3 monitors OK", "monitor_count": 3, "alert_count": 0, "warn_count": 0},
         {"name": "Supabase", "category": "Database", "level": "operational", "description": "All 2 monitors OK", "monitor_count": 2, "alert_count": 0, "warn_count": 0},
-        {"name": "Twilio", "category": "Communications", "level": "operational", "description": "All 2 monitors OK", "monitor_count": 2, "alert_count": 0, "warn_count": 0},
+        {"name": "Twilio SMS (US)", "category": "Communications", "level": "operational", "description": "All 2 monitors OK", "monitor_count": 2, "alert_count": 0, "warn_count": 0},
         {"name": "Customer.io", "category": "Communications", "level": "operational", "description": "All 1 monitors OK", "monitor_count": 1, "alert_count": 0, "warn_count": 0},
         {"name": "Slack", "category": "Communications", "level": "operational", "description": "All 1 monitors OK", "monitor_count": 1, "alert_count": 0, "warn_count": 0},
         {"name": "Datadog", "category": "Observability", "level": "operational", "description": "All 1 monitors OK", "monitor_count": 1, "alert_count": 0, "warn_count": 0},

@@ -45,7 +45,7 @@ SERVICE_DEFINITIONS = [
     ("Shopify",       "Payments",         ["service:shopify"]),
     ("DynamoDB",      "Database",         ["service:dynamodb"]),
     ("Supabase",      "Database",         ["service:supabase"]),
-    ("Twilio",        "Communications",   ["service:twilio"]),
+    ("Twilio SMS (US)", "Communications", ["service:twilio"]),
     ("Customer.io",   "Communications",   ["service:customerio"]),
     ("Slack",         "Communications",   ["service:slack"]),
     ("Datadog",       "Observability",    ["service:datadog"]),
@@ -75,33 +75,39 @@ TEAM_MAPPINGS = {
         "Stytch Auth",
         "Stripe", "Shopify",
         "DynamoDB", "Supabase",
-        "Twilio",
-        "AWS Lambda", "AWS S3",
+        "Twilio SMS (US)",
+        "Segment", "Mixpanel",
+        "Sanity",
+        "AWS Lambda", "AWS S3", "AWS RDS", "Host Health",
         "Cloudflare", "Vercel",
-        "AWS RDS", "Host Health",
+        "Apple Developer",
     ],
     "Clinicians": [
-        "API Gateway",
+        "API Gateway", "API (Enso)",
         "Stytch Auth",
         "Candid Health", "Healthie", "OpenLoop",
         "DynamoDB", "Supabase",
-        "Twilio",
+        "Twilio SMS (US)",
         "AWS RDS", "Host Health",
-    ],
-    "Developers": [
-        "Datadog", "Sentry",
-        "Inngest",
-        "AWS Lambda", "AWS S3",
-        "AWS RDS", "Host Health", "Disk Health",
-        "GitHub", "Bitbucket", "GitLab",
-        "npm Registry", "PyPI",
         "Cloudflare", "Vercel",
     ],
+    "Developers": [
+        "Datadog", "Sentry", "Mixpanel",
+        "Inngest",
+        "AWS Lambda", "AWS S3", "AWS RDS",
+        "Host Health", "Disk Health",
+        "Cloudflare", "Vercel",
+        "GitHub", "Bitbucket",
+        "npm Registry", "PyPI",
+        "Segment",
+    ],
     "Customer Support": [
-        "Slack", "Customer.io", "Twilio",
+        "Slack", "Customer.io", "Twilio SMS (US)",
         "Datadog", "Sentry",
         "Stytch Auth",
         "Stripe", "Shopify",
+        "Candid Health",
+        "API Gateway",
     ],
 }
 
@@ -119,7 +125,7 @@ MOCK_MONITOR_COUNTS = {
     "API Gateway": 5, "API (Enso)": 3, "API (CRO)": 2,
     "Stytch Auth": 2, "Candid Health": 2,
     "Healthie": 2, "OpenLoop": 1, "Stripe": 2, "Shopify": 2,
-    "DynamoDB": 3, "Supabase": 2, "Twilio": 2, "Customer.io": 1,
+    "DynamoDB": 3, "Supabase": 2, "Twilio SMS (US)": 2, "Customer.io": 1,
     "Slack": 1, "Datadog": 1, "Sentry": 1, "Inngest": 2,
     "AWS Lambda": 4, "AWS S3": 2,
     "AWS RDS": 3, "Host Health": 7, "Disk Health": 2,
@@ -295,6 +301,12 @@ class LocalHandler(SimpleHTTPRequestHandler):
             self._handle_internal()
         else:
             super().do_GET()
+
+    def end_headers(self):
+        # Prevent browser caching of HTML files during local dev
+        if hasattr(self, 'path') and (self.path.endswith('.html') or self.path == '/'):
+            self.send_header("Cache-Control", "no-store")
+        super().end_headers()
 
     def _cors_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
